@@ -80,7 +80,6 @@
       };
       row_specs.push(vlSpec);
     }
-    // console.log(row_specs.length);
     
     let finalSpec = {
       "$schema": "https://vega.github.io/schema/vega-lite/v2.json",      
@@ -95,7 +94,6 @@
       "width": 600,
       "height": 600,
       "description": "A scatterplot showing horsepower and miles per gallons.",
-      // "data": {"values": Y.map(row => ({"x": row[0], "y": row[1]}))},
       "data": { "name": "projection" },
       "mark": "circle",
       "encoding": {
@@ -106,10 +104,7 @@
       }
     };
 
-    vegaEmbed("#scatter", scatterSpec, {"actions": false})
-      .then(function(res) {
-        return res;        
-      })
+    vegaEmbed("#scatter", scatterSpec, {"actions": false})      
       .then(function(res) {
         var opt = {}
         opt.epsilon = 10; // epsilon is learning rate (10 = default)
@@ -121,7 +116,7 @@
         let dataRaw = data.map(row => data_columns.map(col => +row[col]));
         tsne.initDataRaw(dataRaw);
 
-        doIterations(tsne, res.view, 0, 100);
+        doIterations(tsne, res.view, 0, 200);
       });
 
     function doIterations(tsne, view, i, maxIter) {
