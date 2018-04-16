@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<head>
+  <title>VISSOFT 2018</title>
+  <meta charset="utf-8">
+
+  <script src="https://cdn.jsdelivr.net/npm/vega@3.2.1/build/vega.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@2.3.1/build/vega-lite.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@3.2.0/build/vega-embed.js"></script>
+
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+
+  <script src="https://cdn.rawgit.com/karpathy/tsnejs/master/tsne.js"></script>
+
+  <style media="screen">
+    /* Add space between Vega-Embed links  */
+    .vega-actions a {
+      margin-right: 5px;
+    }
+
+    .container {
+      display: flex;
+    }
+
+    #vis {
+      overflow:auto;
+      height:800px;
+      width:400px;
+      /*border:1px solid black;*/
+      margin-right: 10px;
+    }
+
+    #scatter {      
+      height: 800px;
+      /*border:1px solid black;*/
+    }
+  </style>
+</head>
+<body>
+  <h1>VISSOFT 2018</h1>
+  <!-- Container for the visualizations -->
+  <div class="container">
+    <div id="vis"></div>
+    <div id="scatter"></div>
+  </div>
+  
+
+  <script>
+  d3.csv("docs_16_comma_1000.csv?" + Math.random()).then(function(data) {
+    // console.log("File loaded successfully!");
+
+    // Filter data columns
+    data_columns = data.columns.filter(col => (col.startsWith("N_") || col.startsWith("R_")) && !col.endsWith("(score)"));
+    
+    let row_specs = [];
+    for (let col of data_columns) {  
+      let vlSpec = {
+        "width": 300,
+        "height": 75,
+        "data": { "values": data },
+        "mark": "bar",
+        "encoding": {
+          "x": {
+            "bin": {
+              "maxbins": 30,
+            },
+            "field": col,
+            "type": "quantitative",
+            "axis": {
+              "title": false
+            },
+          },
+          "y": {        
+            "aggregate": "count",
+            "type": "quantitative",
+            "axis": {
+              "title": col
+            }
+          }
+        }
+      };
+      row_specs.push(vlSpec);
+    }
+    // console.log(row_specs.length);
+    
+    let finalSpec = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v2.json",      
+      "vconcat": row_specs
+    }
+    // Embed the visualization in the container with id `vis`
+    vegaEmbed("#vis", finalSpec, {"actions": false});
+
+
+    let scatterSpec = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+      "width": 600,
+      "height": 600,
+      "description": "A scatterplot showing horsepower and miles per gallons.",
+      // "data": {"values": Y.map(row => ({"x": row[0], "y": row[1]}))},
+      "data": { "name": "projection" },
+      "mark": "circle",
+      "encoding": {
+        "x": {"field": "x", "type": "quantitative"},
+        "y": {"field": "y", "type": "quantitative"},
+        // "color": {"field": data_columns[9], "type": "quantitative"},
+        // "shape": {"field": "y", "type": "nominal"}
+      }
+    };
+
+    vegaEmbed("#scatter", scatterSpec, {"actions": false})
+      .then(function(res) {
+        return res;        
+      })
+      .then(function(res) {
+        var opt = {}
+        opt.epsilon = 10; // epsilon is learning rate (10 = default)
+        opt.perplexity = 30; // roughly how many neighbors each point influences (30 = default)
+        opt.dim = 2; // dimensionality of the embedding (2 = default)
+
+        var tsne = new tsnejs.tSNE(opt); // create a tSNE instance
+
+        let dataRaw = data.map(row => data_columns.map(col => +row[col]));
+        tsne.initDataRaw(dataRaw);
+
+        doIterations(tsne, res.view, 0, 100);
+      });
+
+    function doIterations(tsne, view, i, maxIter) {
+      j = i + 10;
+      for (; i < j; ++i) {
+        // console.log("Iteration", i);
+        tsne.step(); // every time you call this, solution gets better
+      }
+
+      let Y = tsne.getSolution(); // Y is an array of 2-D points that you can plot
+
+      let changeSet = vega.changeset().remove(x => true);
+      changeSet.insert(Y.map(row => ({"x": row[0], "y": row[1]})));
+      view.change('projection', changeSet).run();
+
+      if (i < maxIter) {
+        window.setTimeout(doIterations, 1, tsne, view, i, maxIter);
+      }
+    }
+
+  });
+  </script>
+</body>
+</html>
