@@ -116,6 +116,9 @@
         let dataRaw = data.map(row => data_columns.map(col => +row[col]));
         tsne.initDataRaw(dataRaw);
 
+        // Pseudorandom initialization to ensure predictable outcomes
+        tsne.Y = dataRaw.map(row => [random(), random()]);
+
         doIterations(tsne, res.view, 0, 200);
       });
 
@@ -138,6 +141,13 @@
     }
 
   });
+
+  // https://stackoverflow.com/questions/521295/seeding-the-random-number-generator-in-javascript
+  var seed = 1;
+  function random() {
+      var x = Math.sin(seed++) * 10000;
+      return x - Math.floor(x);
+  }
   </script>
 </body>
 </html>
