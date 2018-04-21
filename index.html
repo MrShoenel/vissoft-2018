@@ -7,6 +7,10 @@
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@2.3.1/build/vega-lite.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@3.2.0/build/vega-embed.js"></script>
 
+  <!-- Vega Tooltip -->
+  <script src="https://cdn.jsdelivr.net/npm/vega-tooltip"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/vega-tooltip/build/vega-tooltip.min.css">
+
   <script src="https://d3js.org/d3.v5.min.js"></script>
 
   <script src="https://cdn.rawgit.com/karpathy/tsnejs/master/tsne.js"></script>
@@ -18,7 +22,12 @@
     }
 
     .container {
+      /*display: flex;*/
+    }
+
+    #text {
       display: flex;
+      justify-content: center;
     }
 
     #vis {
@@ -28,19 +37,15 @@
       /*border:1px solid black;*/
       margin-right: 10px;
     }
-
-    #scatter {      
-      height: 800px;
-      /*border:1px solid black;*/
-    }
   </style>
 </head>
 <body>
   <h1>VISSOFT 2018</h1>
   <!-- Container for the visualizations -->
   <div class="container">
+    <div id="text">t-SNE iterations: 0</div>
     <div id="vis"></div>
-    <div id="scatter"></div>
+    <!-- <div id="scatter"></div> -->
   </div>
   
 
@@ -59,7 +64,7 @@
         "height": 75,
         // "data": { "values": data },
         "mark": {
-          "type": "circle",
+          "type": "point",
           // "interpolate": "monotone",
         },
         "encoding": {
@@ -82,11 +87,25 @@
               "title": col
             }
           },
-          "color": {
+          "opacity": {
             "condition": {
               "selection": "brush",
-              },
-            "value": "grey"
+              "value": 1.0
+            },
+            "value": 0.1
+          },
+          "color": {
+            "condition": {
+              "selection": "brush",              
+            },
+            "value": "lightgray"
+          },
+          "size": {
+            "condition": {
+              "selection": "brush",
+              "value": 100
+            },
+            "value": 50
           }
         }
       };
@@ -133,11 +152,21 @@
     // vegaEmbed("#vis", finalSpec, {"actions": false});
 
     // vegaEmbed("#scatter", scatterSpec, {"actions": false})
-    vegaEmbed("#vis", finalSpec, {"actions": false})      
+    vegaEmbed("#vis", finalSpec, {"actions": false, "mode": "vega-lite"})
       .then(function(res) {
         // Insert the initial data
         res.view.insert("input_data", data).run();
         // console.log(data);
+
+        // result.view is the Vega View, vlSpec is the original Vega-Lite specification
+        vegaTooltip.vegaLite(res.view, finalSpec, {
+          showAllFields: false,
+          fields: [
+            {
+              field: "name",
+            }
+          ]
+        });
 
         // Do the t-SNE
         var opt = {}
@@ -153,15 +182,17 @@
         // Pseudorandom initialization to ensure predictable outcomes
         tsne.Y = dataRaw.map(row => [random(), random()]);
 
-        doIterations(tsne, res.view, 0, 30);
+        // doIterations(tsne, res.view, 0, 30);
+        window.setTimeout(doIterations, 1, tsne, res.view, 0, 30);
       });
 
     function doIterations(tsne, view, i, maxIter) {
       j = i + 10;
       for (; i < j; ++i) {
-        console.log("Iteration", i);
+        // console.log("Iteration", i);        
         tsne.step(); // every time you call this, solution gets better
       }
+      document.getElementById("text").innerHTML = "t-SNE iterations: " + i;
 
       let Y = tsne.getSolution(); // Y is an array of 2-D points that you can plot
 
