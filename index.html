@@ -49,7 +49,8 @@
     // console.log("File loaded successfully!");
 
     // Filter data columns
-    data_columns = data.columns.filter(col => (col.startsWith("N_") || col.startsWith("R_")) && !col.endsWith("(score)"));
+    // data_columns = data.columns.filter(col => (col.startsWith("N_") || col.startsWith("R_")) && !col.endsWith("(score)"));
+    data_columns = data.columns.filter(col => col.endsWith("(score)"));
     
     let row_specs = [];
     for (let col of data_columns) {  
@@ -57,20 +58,25 @@
         "width": 300,
         "height": 75,
         "data": { "values": data },
-        "mark": "bar",
+        "mark": {
+          "type": "circle",
+          // "interpolate": "monotone",
+        },
         "encoding": {
           "x": {
-            "bin": {
-              "maxbins": 30,
-            },
-            "field": col,
+            // "bin": {
+            //   "maxbins": 30,
+            // },
+            "field": col.slice(0, -8),
+            // "field": "#",
             "type": "quantitative",
             "axis": {
               "title": false
             },
           },
-          "y": {        
-            "aggregate": "count",
+          "y": {
+            "field": col,
+            // "aggregate": "count",
             "type": "quantitative",
             "axis": {
               "title": col
@@ -95,16 +101,26 @@
       "height": 600,
       "description": "A scatterplot showing horsepower and miles per gallons.",
       "data": { "name": "projection" },
+      "selection": {
+        "brush": {
+          "type": "interval"
+        }
+      },
       "mark": "circle",
       "encoding": {
-        "x": {"field": "x", "type": "quantitative"},
-        "y": {"field": "y", "type": "quantitative"},
-        // "color": {"field": data_columns[9], "type": "quantitative"},
+        "x": {"field": "proj_x", "type": "quantitative"},
+        "y": {"field": "proj_y", "type": "quantitative"},
+        "color": {
+          "condition": {
+            "selection": "brush",
+            },
+          "value": "grey"
+        }
         // "shape": {"field": "y", "type": "nominal"}
       }
     };
 
-    vegaEmbed("#scatter", scatterSpec, {"actions": false})      
+    vegaEmbed("#scatter", scatterSpec, {"actions": false})
       .then(function(res) {
         var opt = {}
         opt.epsilon = 10; // epsilon is learning rate (10 = default)
@@ -119,20 +135,20 @@
         // Pseudorandom initialization to ensure predictable outcomes
         tsne.Y = dataRaw.map(row => [random(), random()]);
 
-        doIterations(tsne, res.view, 0, 200);
+        doIterations(tsne, res.view, 0, 30);
       });
 
     function doIterations(tsne, view, i, maxIter) {
       j = i + 10;
       for (; i < j; ++i) {
-        // console.log("Iteration", i);
+        console.log("Iteration", i);
         tsne.step(); // every time you call this, solution gets better
       }
 
       let Y = tsne.getSolution(); // Y is an array of 2-D points that you can plot
 
       let changeSet = vega.changeset().remove(x => true);
-      changeSet.insert(Y.map(row => ({"x": row[0], "y": row[1]})));
+      changeSet.insert(Y.map(row => ({"proj_x": row[0], "proj_y": row[1]})));
       view.change('projection', changeSet).run();
 
       if (i < maxIter) {
