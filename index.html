@@ -22,9 +22,9 @@
     }
 
     #vis {
-      overflow:auto;
+      /*overflow:auto;*/
       height:800px;
-      width:400px;
+      width:1000px;
       /*border:1px solid black;*/
       margin-right: 10px;
     }
@@ -57,7 +57,7 @@
       let vlSpec = {
         "width": 300,
         "height": 75,
-        "data": { "values": data },
+        // "data": { "values": data },
         "mark": {
           "type": "circle",
           // "interpolate": "monotone",
@@ -81,26 +81,24 @@
             "axis": {
               "title": col
             }
+          },
+          "color": {
+            "condition": {
+              "selection": "brush",
+              },
+            "value": "grey"
           }
         }
       };
       row_specs.push(vlSpec);
     }
     
-    let finalSpec = {
-      "$schema": "https://vega.github.io/schema/vega-lite/v2.json",      
-      "vconcat": row_specs
-    }
-    // Embed the visualization in the container with id `vis`
-    vegaEmbed("#vis", finalSpec, {"actions": false});
-
-
     let scatterSpec = {
       "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
       "width": 600,
       "height": 600,
       "description": "A scatterplot showing horsepower and miles per gallons.",
-      "data": { "name": "projection" },
+      // "data": { "name": "projection" },
       "selection": {
         "brush": {
           "type": "interval"
@@ -120,8 +118,28 @@
       }
     };
 
-    vegaEmbed("#scatter", scatterSpec, {"actions": false})
+    let finalSpec = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+      "data": { "name": "input_data" },
+      "hconcat": [
+        {
+          "vconcat": row_specs
+        },
+        scatterSpec
+      ]
+    }
+
+    // Embed the visualization in the container with id `vis`
+    // vegaEmbed("#vis", finalSpec, {"actions": false});
+
+    // vegaEmbed("#scatter", scatterSpec, {"actions": false})
+    vegaEmbed("#vis", finalSpec, {"actions": false})      
       .then(function(res) {
+        // Insert the initial data
+        res.view.insert("input_data", data).run();
+        // console.log(data);
+
+        // Do the t-SNE
         var opt = {}
         opt.epsilon = 10; // epsilon is learning rate (10 = default)
         opt.perplexity = 30; // roughly how many neighbors each point influences (30 = default)
@@ -147,9 +165,17 @@
 
       let Y = tsne.getSolution(); // Y is an array of 2-D points that you can plot
 
-      let changeSet = vega.changeset().remove(x => true);
-      changeSet.insert(Y.map(row => ({"proj_x": row[0], "proj_y": row[1]})));
-      view.change('projection', changeSet).run();
+      let changeSet = vega.changeset();
+      
+      // changeSet.remove(x => true);
+      // changeSet.insert(Y.map(row => ({"proj_x": row[0], "proj_y": row[1]})));
+
+      for (let i = 0; i < data.length; ++i) {
+        changeSet.modify(data[i], "proj_x", Y[i][0]);
+        changeSet.modify(data[i], "proj_y", Y[i][1]);
+      }      
+      
+      view.change('input_data', changeSet).run();
 
       if (i < maxIter) {
         window.setTimeout(doIterations, 1, tsne, view, i, maxIter);
