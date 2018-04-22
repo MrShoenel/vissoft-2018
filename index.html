@@ -183,7 +183,7 @@
         tsne.Y = dataRaw.map(row => [random(), random()]);
 
         // doIterations(tsne, res.view, 0, 30);
-        window.setTimeout(doIterations, 1, tsne, res.view, 0, 30);
+        window.setTimeout(doIterations, 1, tsne, res.view, 0, 150);
       });
 
     function doIterations(tsne, view, i, maxIter) {
