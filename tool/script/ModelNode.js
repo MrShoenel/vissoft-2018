@@ -52,12 +52,12 @@ class ModelNode {
    * @returns {Array.<ComputedData>}
    */
   getComputedData(type = void 0) {
-    if (typeof type === 'symbol' && !this.hasState(this.state)) {
+    if (!this.hasState(this.state)) {
       throw new Error(`The current state (${this.state}) is not computed!`);
     }
 
     const arr = this._states[this.state];
-    if (type) {
+    if (typeof type === 'symbol') {
       return arr.filter(cd => cd.type === type);
     }
     return arr;
@@ -70,7 +70,7 @@ class ModelNode {
    * @returns {string}
    */
   get state() {
-    return `[${this.name}]--{${this._children.sort((c1, c2) => c1.name.localeCompare(c2)).map(c => c.state).join(';')}}`;
+    return `[${this.name}]--{${this._children.sort((c1, c2) => c1.name.localeCompare(c2.name)).map(c => c.state).join(';')}}`;
   };
 
   /**
@@ -92,12 +92,6 @@ class ModelNode {
     if (!this.hasState(currentState)) {
       // This node does not have
       const childData = this._children.map(c => c.getComputedData());
-      if (childData.length > 0 && !childData[0]) {
-        console.log(childData);
-        console.log(this);
-        const foo = this._children.map(c => c.getComputedData());
-        console.log(foo);
-      }
       const p = new Parallel(Object.keys(ComputedData.types).map(k => {
         return {
           symbol: k,
@@ -110,9 +104,7 @@ class ModelNode {
       
       const rawResult = await p.map(compute);
       this._states[currentState] = [];
-
-      // TODO: For each rawResult, create a ComputedData and push into this._states
-      // TODO: THIS IS WRONG AS IT DOES NOT CURRENTLY MATCH THE C'TOR OF COMPUTEDDATA!
+      
       for (const raw of rawResult) {
         this._states[currentState].push(new ComputedData(
           Enum_Computation_Types[raw.symbol],

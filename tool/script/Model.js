@@ -49,7 +49,7 @@ class Model {
     /** @param {Array.<ModelNode>} nodes */
     const walk = nodes => {
       nodes.forEach(node => {
-        console.log(`${Array(indent - 1).join('  ')}|- ${node.name}`);
+        console.log(`${Array(indent).join('  ')}|- ${node.name}`);
         if (node._children.length > 0) {
           indent++;
           walk(node._children);
