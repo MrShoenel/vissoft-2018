@@ -9,8 +9,10 @@ const run = async() => {
     '/data/default.csv', '/data/default-model.json');
 
   const model = new Model(ds);
-  model.print();
+  const start = +new Date;
   await model.recompute();
+  console.info(`Model is computed and up-2-date! Computation took ${(+new Date) - start}ms`);
+  model.print();
 };
 
 export { run };
