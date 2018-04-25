@@ -1,0 +1,43 @@
+{
+  "name": "vissoft2018-tool",
+  "description": "A visualization tool developed as part of a paper to be submitted to VISSOFT 2018.",
+  "main": "index.html",
+  "authors": [
+    {
+      "name": "Maria Ulan",
+      "email": "maria.ulan@lnu.se",
+      "url": "https://lnu.se/en/staff/maria.ulan/"
+    },
+    {
+      "name": "Rafael Messias Martins",
+      "email": "rafael.martins@lnu.se",
+      "url": "https://lnu.se/en/staff/rafael.martins/"
+    },
+    {
+      "name": "Sebastian Hönel",
+      "email": "sebastian.honel@lnu.se",
+      "url": "https://lnu.se/en/staff/sebastian.honel/"
+    }
+  ],
+  "license": "ISC",
+  "keywords": [
+    "Vissoft 2018",
+    "CDF",
+    "distributions",
+    "metrics",
+    "empirical distribution"
+  ],
+  "homepage": "https://gitlab.com/isovis/vissoft2018",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3": "^5.1.0",
+    "rxjs": "^4.1.0"
+  }
+}

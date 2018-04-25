@@ -1,0 +1,55 @@
+{
+  "name": "vissoft2018-tool",
+  "version": "0.1.0",
+  "description": "A visualization tool developed as part of a paper to be submitted to VISSOFT 2018 that can visualize (joint) probabilities based on empirical CDFs.",
+  "main": "index.html",
+  "scripts": {
+    "install": "bower install",
+    "start": "http-server ./ -a localhost -o -p 10080 -c-1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/isovis/vissoft2018.git"
+  },
+  "keywords": [
+    "Vissoft 2018",
+    "CDF",
+    "distributions",
+    "metrics",
+    "empirical distribution"
+  ],
+  "contributors": [
+    {
+      "name": "Maria Ulan",
+      "email": "maria.ulan@lnu.se",
+      "url": "https://lnu.se/en/staff/maria.ulan/"
+    },
+    {
+      "name": "Rafael Messias Martins",
+      "email": "rafael.martins@lnu.se",
+      "url": "https://lnu.se/en/staff/rafael.martins/"
+    }
+  ],
+  "author": {
+    "name": "Sebastian Hönel",
+    "email": "sebastian.honel@lnu.se",
+    "url": "https://lnu.se/en/staff/sebastian.honel/"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/isovis/vissoft2018/issues"
+  },
+  "homepage": "https://gitlab.com/isovis/vissoft2018#README",
+  "dependencies": {
+    "bower": "^1.8.4",
+    "browser-es-module-loader": "^0.4.1",
+    "es-module-loader": "^2.2.8",
+    "http-server": "^0.11.1",
+    "paralleljs": "^0.2.1"
+  },
+  "devDependencies": {
+    "@types/d3": "^5.0.0",
+    "@types/paralleljs": "0.0.18",
+    "@types/rx": "^4.1.1"
+  }
+}
