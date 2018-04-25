@@ -1,0 +1,92 @@
+{
+  "//": "This file contains the default schema to wire up the data from the file 'default.csv' (in this same directory). This file defines which columes should be used and how the aggregation works.",
+
+  "//": "The following properties are the actual metrics we are using. Below that, we have the first level of aggregation and then we go to Quality on the top-level in this examplary model. The field 'useColumn' should be set to true iff the name is equal to a name of a column in the data and the node should use the data from that column.",
+  "model": [{
+    "name": "N_SentenceSize",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "N_XMLSize",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "R_Stability",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "N_InEdgeCount",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "N_OutEdgeCount",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "R_XMLSimilarity",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "R_XMLUniqueness",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "N_PointlessAbstraction",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "R_TextSimilarity",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "N_TextSize",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "N_SubSectionWidth",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "N_SubSectionDepth",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "N_BrokenRefs",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "N_BackRefs",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "N_TextSimilar",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "R_TextUniqueness",
+    "useColumn": true,
+    "sources": []
+  },
+
+
+  {
+    "name": "Cloning Issues",
+    "useColumn": false,
+    "sources": ["R_TextUniqueness", "R_XMLUniqueness", "R_TextSimilarity", "R_XMLSimilarity", "N_TextSimilar"]
+  }, {
+    "name": "Text Complexity",
+    "useColumn": false,
+    "sources": ["N_SentenceSize", "N_TextSize"]
+  }, {
+    "name": "Anti Patterns",
+    "useColumn": false,
+    "sources": ["R_Stability", "N_BrokenRefs", "N_BackRefs", "N_PointlessAbstraction"]
+  },
+
+
+  {
+    "name": "Quality",
+    "useColumn": false,
+    "sources": ["Cloning Issues", "Text Complexity", "Anti Patterns"]
+  }]
+}
