@@ -31,6 +31,17 @@ class ComputedData {
   static get types() {
     return Enum_Computation_Types;
   };
+
+  /**
+   * @param {Symbol|string} type
+   * @param {Array.<Column>} chunks
+   * @returns {ComputedData}
+   */
+  static fromChunks(type, ...chunks) {
+    const data = [];
+    chunks.forEach(chunk => data.push.apply(data, chunk.data));
+    return new ComputedData(type, data);
+  };
 };
 
 
