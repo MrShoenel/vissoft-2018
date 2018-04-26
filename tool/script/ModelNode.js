@@ -1,20 +1,8 @@
+import * as typedefs from './typedefs.js';
 import { Dataset } from './Dataset.js';
 import { Enum_Event_Types } from './Model.js';
-import { ComputedData, Enum_Computation_Types, compute } from './ComputedData.js';
+import { ComputedData, Enum_Computation_Types, computeCDF, partitionToRanges } from './ComputedData.js';
 
-/**
- * @typedef JsonModelNode
- * @type {Object}
- * @property {string} name
- * @property {boolean} useColumn
- * @property {Array.<CSVColumn|JsonModelNode>} sources
- */
-
-/**
- * @typedef JsonModel
- * @type {Object}
- * @property {Array.<JsonModelNode>} model
- */
 
 
 /**
@@ -42,6 +30,7 @@ class ModelNode {
    * @param {JsonModelNode} node
    */
   constructor(dataset, node) {
+    this.dataset = dataset;
     this.length = dataset.length;
     this.name = node.name;
 
@@ -59,14 +48,6 @@ class ModelNode {
 
     /** @type {Array.<Rx.Observer.<ModelNodeEvent>>} */
     this._observers = [];
-
-    // TODO: FIX THIS ONCE WE'RE DONE WITH GETCOLUMN(..)
-    // if (this.isMetric) {
-    //   // Compute all types of data based on the metrics
-    //   this._states[this.state] = Object.keys(ComputedData.types).map(key => {
-    //     return new ComputedData(ComputedData.types[key], dataset.getColumn(node.name));
-    //   });
-    // }
   };
 
   /**
@@ -100,8 +81,8 @@ class ModelNode {
   };
   
   /**
-   * 
-   * @param {Symbol} type 
+   * @see {Enum_Computation_Types}
+   * @param {Symbol} type one of {Enum_Computation_Types}
    * @returns {Array.<ComputedData>}
    */
   getComputedData(type = void 0) {
@@ -151,40 +132,105 @@ class ModelNode {
     return this._children.length * this.length**2;
   };
 
-  async recompute() {
-    const currentState = this.state;
+  async _recomputeMetric() {
+    const column = this.dataset.getColumn(this.name);
+    const parallel = new Parallel([
+      { column, cdf: true },
+      { column, cdf: false }
+    ], {
+      maxWorkers: 2
+    }).require({
+      fn: computeCDF, name: computeCDF.name
+    });
+
+    const raw = await parallel.map(columnDesc => {
+      return computeCDF(
+        [columnDesc.column], 0, columnDesc.column.data.length, !columnDesc.cdf);
+    });
+
+    this._states[this.state] = raw.map(r => {
+      return new ComputedData(r.colName, r.data);
+    });
+
+    return this;
+  };
+
+  async _recomputeAggregate() {
+    if (this._children.length === 0) {
+      // Then this node is an aggregation without any current children
+      // (free floating). So we cannot compute anything.
+      this._states[this.state] = [];
+      return;
+    }
 
     // Depth first: Recompute all children, then this node:
     for (const child of this._children) {
       await child.recompute();
     }
 
+    // We need to transform the children's data to Column-objects
+    const childData_CDF = this._children.map(
+      c => {
+        return /** @type {Column} */ {
+          colName: c.name,
+          data: c.getComputedData(Enum_Computation_Types.CDF)[0].data
+        };
+      });
+    const childData_CCDF = this._children.map(
+      c => {
+        return /** @type {Column} */ {
+          colName: c.name,
+          data: c.getComputedData(Enum_Computation_Types.CCDF)[0].data
+        };
+      });
+
+    // In this method, we parallelize over the rows. Every worker will do
+    // a computation for one chunk of CDF and one chunk of CCDF.
+    const ranges = partitionToRanges(
+      childData_CDF[0].data.length, navigator.hardwareConcurrency || 4);
+    
+    const parallel = new Parallel(ranges.map(range => {
+      return {
+        childData_CDF,
+        childData_CCDF,
+        range
+      }
+    }), {
+      maxWorkers: ranges.length
+    }).require({
+      fn: computeCDF, name: computeCDF.name
+    });
+
+    const raw = await parallel.map(rangeObj => {
+      const cdfChunk = computeCDF(
+        rangeObj.childData_CDF, rangeObj.range.start, rangeObj.range.length, false);
+      const ccdfChunk = computeCDF(
+        rangeObj.childData_CCDF, rangeObj.range.start, rangeObj.range.length, true);
+
+      return { cdfChunk, ccdfChunk };
+    });
+
+
+    // Now we have to merge the chunks into one ComputedData:
+    this._states[this.state] = [
+      ComputedData.fromChunks(
+        Enum_Computation_Types.CDF, ...raw.map(r => r.cdfChunk)),
+      ComputedData.fromChunks(
+        Enum_Computation_Types.CCDF, ...raw.map(r => r.ccdfChunk))
+    ];
+
+    return this;
+  };
+
+  async recompute() {
+    const currentState = this.state;
+
     // Now this node:
     if (!this.hasState(currentState)) {
-      // This node does not have
-      const childData = this._children.map(c => c.getComputedData());
-      const p = new Parallel(Object.keys(ComputedData.types).map(k => {
-        return {
-          symbol: k,
-          data: childData.map(cdcd => {
-            const idx = cdcd.findIndex(cd => cd.type === ComputedData.types[k]);
-            return cdcd[idx].data;
-          })
-        };
-      }), {
-        // This is the default behavior in v0.2.1 but it seems that our installed
-        // version did not use navigator.hardwareConcurrency.
-        maxWorkers: navigator.hardwareConcurrency || 4
-      });
-      
-      const rawResult = await p.map(compute);
-      this._states[currentState] = [];
-      
-      for (const raw of rawResult) {
-        this._states[currentState].push(new ComputedData(
-          Enum_Computation_Types[raw.symbol],
-          raw.result
-        ));
+      if (this.isMetric) {
+        await this._recomputeMetric();
+      } else {
+        await this._recomputeAggregate();
       }
 
       this._emitEvent(new ModelNodeEvent(this, Enum_Event_Types.Progress, 1));

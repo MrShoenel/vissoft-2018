@@ -1,35 +1,4 @@
-/**
- * There is also DSVParsedArray and DSVRowString in d3 but we use this:
- * @typedef CSVNumericData
- * @type {Array.<Object.<string, number>>}
- */
-
-/**
- * @typedef CSVColumn
- * @type {string}
- */
-
-/**
- * @typedef JsonModelNode
- * @type {Object}
- * @property {string} name
- * @property {Array.<CSVColumn|JsonModelNode>} sources
- */
-
-/**
- * @typedef JsonModel
- * @type {Object}
- * @property {{ generateColName: string, from: Array.<string>}} entityId
- * @property {Array.<JsonModelNode>} model
- */
-
- 
-/**
- * @typedef EntityData
- * @type {Object}
- * @property {string} id
- * @property {number} val
- */
+import * as typedefs from './typedefs.js';
 
 
 
@@ -77,7 +46,7 @@ class Dataset {
 
   /**
    * @param {string} colName
-   * @returns {{colName: string, data: Array.<EntityData>}}
+   * @returns {Column}
    */
   getColumn(colName) {
     if (!this.hasColumn(colName)) {
