@@ -1,4 +1,4 @@
-
+import * as typedefs from './typedefs.js';
 
 
 const Enum_Computation_Types = Object.freeze({
@@ -6,13 +6,6 @@ const Enum_Computation_Types = Object.freeze({
   CCDF: Symbol('CCDF')
 });
 
-
-/**
- * @typedef EntityData
- * @type {Object}
- * @property {string} id
- * @property {number} val
- */
 
 
 class ComputedData {
@@ -41,15 +34,12 @@ class ComputedData {
 };
 
 
+
+
+
 /**
  * @param {{symbol: string, data: Array.<Array.<number>>}} symbAndData
  * @returns {{symbol: string, result: Array.<number>}} the 1-dimensional, computed data
-/**
- * @typedef Column
- * @type {Object}
- * @property {string} colName
- * @property {Array.<EntityData>} data
- */
  */
 const compute = symbAndData => {
   const doCdf = symbAndData.symbol === 'CDF';

@@ -1,20 +1,8 @@
+import * as typedefs from './typedefs.js';
 import { Dataset } from './Dataset.js';
 import { Enum_Event_Types } from './Model.js';
 import { ComputedData, Enum_Computation_Types, compute } from './ComputedData.js';
 
-/**
- * @typedef JsonModelNode
- * @type {Object}
- * @property {string} name
- * @property {boolean} useColumn
- * @property {Array.<CSVColumn|JsonModelNode>} sources
- */
-
-/**
- * @typedef JsonModel
- * @type {Object}
- * @property {Array.<JsonModelNode>} model
- */
 
 
 /**

@@ -1,3 +1,4 @@
+import * as typedefs from './typedefs.js';
 import { Dataset } from './Dataset.js';
 import { Model, Enum_Event_Types } from './Model.js';
 

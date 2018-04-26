@@ -1,21 +1,8 @@
+import * as typedefs from './typedefs.js';
 import { Dataset } from './Dataset.js';
 import { ModelNode } from './ModelNode.js';
 
 
-/**
- * @typedef JsonModelNode
- * @type {Object}
- * @property {string} name
- * @property {boolean} isColumn
- * @property {Array.<string>} sources
- */
-
-/**
- * @typedef JsonModel
- * @type {Object}
- * @property {Array.<string>} entityId
- * @property {Array.<JsonModelNode>} model
- */
 
 
 const Enum_Event_Types = Object.freeze({
