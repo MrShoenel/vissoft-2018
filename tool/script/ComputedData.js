@@ -7,14 +7,29 @@ const Enum_Computation_Types = Object.freeze({
 });
 
 
+/**
+ * @typedef EntityData
+ * @type {Object}
+ * @property {string} id
+ * @property {number} val
+ */
+
+
 class ComputedData {
   /**
    * @param {Symbol|string} type
-   * @param {Array.<number>} data the computed data as 1-dimensional vector
+   * @param {Array.<EntityData>} data the computed data as 1-dimensional vector
    */
   constructor(type, data) {
     this.type = typeof type === 'symbol' ? type : Enum_Computation_Types[type];
-    this.data = data;
+    this.data = data.sort((a, b) => a.val - b.val);
+
+    this.min = data.length === 0 ? void 0 : this.data[0].val;
+    this.max = data.length === 0 ? void 0 : this.data[this.data.length - 1].val;
+  };
+
+  get range() {
+    return this.max - this.min;
   };
 
   /**
@@ -29,6 +44,12 @@ class ComputedData {
 /**
  * @param {{symbol: string, data: Array.<Array.<number>>}} symbAndData
  * @returns {{symbol: string, result: Array.<number>}} the 1-dimensional, computed data
+/**
+ * @typedef Column
+ * @type {Object}
+ * @property {string} colName
+ * @property {Array.<EntityData>} data
+ */
  */
 const compute = symbAndData => {
   const doCdf = symbAndData.symbol === 'CDF';
