@@ -39,3 +39,11 @@
  * @property {string} colName
  * @property {Array.<EntityData>} data
  */
+
+
+/**
+ * @typedef Range
+ * @type {Object}
+ * @property {number} start
+ * @property {number} length
+ */
