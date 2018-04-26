@@ -161,8 +161,49 @@ const computeCDF = (data, partOffset = 0, partSize = void 0, doCCDF = false) => 
 };
 
 
+/**
+ * Creates ranges that can be used to iterate partitions.
+ * 
+ * @param {number} length designates the length of the range (positive integer)
+ * @param {number} partitions the amount of partitions
+ * @param {number} idxStart optional offset within length
+ * @returns {Array.<Range>}
+ */
+const partitionToRanges = (length, partitions, idxStart = 0) => {
+  let range = length - idxStart;
+  if (range < 0) {
+    throw new Error(`The startIdx is beyond the length.`);
+  } else if (range === 0) {
+    return []; // no ranges
+  } else if (isNaN(range)) {
+    throw new Error(`The calculated range of '${range}' is invalid.`);
+  }
+  
+
+  if (isNaN(partitions) || partitions < 1) {
+    throw new Error(`The amount of partitions must be greater than 0.`);
+  }
+
+  const partSize = Math.ceil(range / partitions);
+  const result = [];
+
+  while (range > 0) {
+    result.push({
+      start: idxStart,
+      length: Math.min(partSize, range)
+    });
+
+    idxStart += partSize;
+    range -= partSize;
+  }
+
+  return result;
+};
+
+
 export {
   Enum_Computation_Types,
   ComputedData,
-  computeCDF
+  computeCDF,
+  partitionToRanges
 };
