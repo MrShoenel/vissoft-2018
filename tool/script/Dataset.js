@@ -19,18 +19,19 @@
 /**
  * @typedef JsonModel
  * @type {Object}
+ * @property {{ generateColName: string, from: Array.<string>}} entityId
  * @property {Array.<JsonModelNode>} model
  */
 
-
+ 
 /**
- * Used when the Dataset emits some kind of event.
+ * @typedef EntityData
+ * @type {Object}
+ * @property {string} id
+ * @property {number} val
  */
-class DatasetEvent {
-  constructor(dataset) {
-    this.dataset = dataset;
-  };
-};
+
+
 
 /**
  * This class will load an entire dataset and the Model.
@@ -43,9 +44,21 @@ class Dataset {
   constructor(data, model) {
     this.data = data;
     this.model = model;
+    this.entityIdColumn = model.entityId.generateColName;
 
-    /** @type {Array.<Rx.Observer.<DatasetEvent>>} */
-    this._observers = [];
+    for (const row of data) {
+      this.computeEntityId(row);
+    }
+  };
+
+  /**
+   * 
+   * @param {d3.DSVRowString} rowString 
+   * @returns {string}
+   */
+  computeEntityId(rowString) {
+    rowString[this.entityIdColumn] = this.model.entityId.from.map(
+      f => rowString[f]).join('-');
   };
 
   /**
@@ -56,14 +69,30 @@ class Dataset {
   };
 
   /**
+   * @returns {number}
+   */
+  get length() {
+    return this.data.length;
+  };
+
+  /**
    * @param {string} colName
-   * @returns {Array.<number>}
+   * @returns {{colName: string, data: Array.<EntityData>}}
    */
   getColumn(colName) {
     if (!this.hasColumn(colName)) {
       throw new Error(`The column '${colName}' is not known.`);
     }
-    return this.data.map(d => d[colName]);
+
+    return {
+      colName,
+      data: this.data.map(d => {
+        return {
+          id: d[this.entityIdColumn],
+          val: d[colName]
+        };
+      })
+    };
   };
 
   /**
@@ -72,24 +101,6 @@ class Dataset {
    */
   hasColumn(name) {
     return this.columns.findIndex(c => c === name) >= 0;
-  };
-
-  /**
-   * @param {DatasetEvent} event The DatasetEvent to emit to all observers
-   */
-  _emitEvent(event) {
-    this._observers.forEach(obs => obs.onNext(event));
-  };
-
-  /**
-   * @param {(value: DatasetEvent) => void} onNext
-   * @param {(exception: any) => void} onError
-   * @returns {Rx.Observer.<DatasetEvent>}
-   */
-  subscribe(onNext, onError = void 0) {
-    const obs = Rx.Observer.create(onNext, onError);
-    this._observers.push(obs);
-    return obs;
   };
 
   static async fromDataAndQm(pathToData, pathToQm) {
@@ -102,6 +113,5 @@ class Dataset {
 
 
 export {
-  DatasetEvent,
   Dataset
 };
