@@ -50,6 +50,7 @@
   },
   "devDependencies": {
     "@types/d3": "^5.0.0",
+    "@types/jquery": "^3.3.1",
     "@types/paralleljs": "0.0.18",
     "@types/rx": "^4.1.1",
     "babel-cli": "^6.26.0",
