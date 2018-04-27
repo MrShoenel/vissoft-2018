@@ -31,6 +31,10 @@ const run = async() => {
   // to get notified of changes. Currently, there is only the progress-event,
   // but feel free to add more in the Enum_Event_Types. But I guess that may
   // not be necessary, because you can listen for progress with value === 1.
+
+  // @RAFAEL: What most likely would be of interest to you is when the graph
+  // changed, in particular when the selected files change. You should subscribe
+  // to the GridboxGraph's observable's event 'selection'.
 };
 
 export { run };
