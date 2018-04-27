@@ -79,8 +79,15 @@
     <script src="./node_modules/browser-es-module-loader/dist/babel-browser-build.js"></script>
     <script src="./node_modules/browser-es-module-loader/dist/browser-es-module-loader.js"></script>
 
-    <script type="module">
+    <script type="module" id="init" data-run="false">
     (async() => {
+      const scriptTag = document.querySelector('script#init');
+      if (scriptTag.getAttribute('data-run') === 'false') {
+        scriptTag.setAttribute('data-run', 'true');
+      } else {
+        return;
+      }
+
       try {
         const run = (await import('./script/main.js')).run;
         await run();

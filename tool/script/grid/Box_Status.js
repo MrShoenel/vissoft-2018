@@ -11,11 +11,6 @@ class GridboxStatus {
    * @param {Rx.Observable.<LoadEvent>} dataObservable 
    */
   constructor(dataObservable) {
-    dataObservable.subscribe(evt => {
-      this.dataset = evt.dataset;
-      this.model = evt.model;
-    });
-
     /** @type {'pre'|'console'} */
     this._loggerType = 'pre';
 
@@ -39,9 +34,16 @@ class GridboxStatus {
     this.btnExport.setAttribute('disabled', 'disabled');
 
     this.btnRecomp = document.querySelector('button#btn-recomp-model');
+    this.btnRecomp.setAttribute('disabled', 'disabled');
     this.btnRecomp.addEventListener('click', async() => {
       this.btnRecomp.setAttribute('disabled', 'disabled');
       await this.recompute();
+    });
+
+    dataObservable.subscribe(evt => {
+      this.dataset = evt.dataset;
+      this.model = evt.model;
+      this.btnRecomp.removeAttribute('disabled');
     });
   };
 
@@ -99,7 +101,7 @@ class GridboxStatus {
     this.logger(
       `Model is computed and up-2-date! Computation took ${(+new Date) - start}ms`);
     this.logger(
-      `Model recomputation cost is: ${model.recomputeCost} (should be 0 now)`);
+      `Model recomputation cost is: ${this._model.recomputeCost} (should be 0 now)`);
   };
 
   /**
