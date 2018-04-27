@@ -1,0 +1,47 @@
+html {
+  background: url(grained.jpg) repeat;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+div#main-grid {
+  margin-top: 2.5em;
+  display: grid;
+  width: 100%;
+  min-height: 600px;
+  grid-template-columns: calc(50% - 5px) calc(50% - 5px);
+  grid-column-gap: 10px;
+}
+div#main-grid > div {
+  height: 100%;
+  background-color: #ccc;
+}
+
+div#tsne-grid {
+  background: transparent !important;
+  display: grid;
+  min-height: 600px;
+  height: 100%;
+  grid-template-rows: calc(50% - 5px) calc(50% - 5px);
+  grid-row-gap: 10px;
+}
+div#tsne-grid > div {
+  background-color: #888;
+}
+
+h3#status {
+  margin-top: 2.5em;
+}
+section {
+  display: block;
+}
+pre#log {
+  height: 10em;
+  background-color: #fff;
+  color: steelblue;
+  font-family: 'Consolas', 'Courier New', Courier, monospace;
+  overflow-y: scroll;
+  resize: vertical;
+}
+progress#model-load-progress {
+  width: 400px;
+}
