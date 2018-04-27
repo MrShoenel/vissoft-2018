@@ -34,14 +34,40 @@ class Model {
   /**
    * @param {Dataset} dataset 
    */
-  constructor(dataset) {
+  constructor(dataset = void 0) {
     /** @type {Object.<string, ModelNode>} */
     this.allNodes = {};
 
     /** @type {Array.<Rx.Observer.<ModelEvent>>} */
     this._observers = [];
 
+    if (dataset instanceof Dataset) {
+      this.load(dataset);
+    }
+  };
+
+  /**
+   * Initializes this Model from the Dataset given. If this Model had
+   * been initialized earlier, then its entire current state and all
+   * associated nodes are discarded.
+   * 
+   * @param {Dataset} dataset 
+   */
+  load(dataset) {
+    this.allNodes = {};
+
+    this._observable = Rx.Observable.create(observer => {
+      this._observers.push(observer);
+      const oldDispose = observer.dispose;
+      observer.dispose = () => {
+        this._unsubscribe(observer);
+        oldDispose.call(observer);
+      };
+    });
+
     this._initAllNodes(dataset);
+
+    return this;
   };
 
   /**
@@ -77,26 +103,28 @@ class Model {
   };
 
   /**
-   * @param {(value: ModelEvent) => void} onNext
-   * @param {(exception: any) => void} onError
-   * @returns {Rx.IDisposable|Rx.Observer.<ModelEvent>}
-   */
-  subscribe(onNext, onError = void 0) {
-    const obs = Rx.Observer.create(onNext, onError);
-    this._observers.push(obs);
-    return obs;
-  };
-
-  /**
+   * Can be called directly but it is recommended to call dispose()
+   * on the Observer/Subscription.
+   * 
    * @param {Rx.IDisposable|Rx.Observer.<ModelEvent>} subscriber 
    */
-  unsubscribe(subscriber) {
+  _unsubscribe(subscriber) {
     const idx = this._observers.findIndex(o => o === subscriber);
     if (idx < 0) {
       throw new Error(`The subscriber is not currently known.`);
     }
     this._observers.splice(idx, 1);
-    subscriber.dispose();
+  };
+
+  /**
+   * Obtain the Observable for this ModelNode that emits ModelEvent.
+   * This Observable never drains. To save resources, call dispose() on
+   * obtained Observers, when not longer needed.
+   * 
+   * @returns {Rx.Observable.<ModelEvent>}
+   */
+  get observable() {
+    return this._observable;
   };
 
   /**
@@ -137,14 +165,14 @@ class Model {
 
     Object.keys(this.allNodes).map(key => this.allNodes[key]).forEach(node => {
       const costBefore = node.recomputeCost;
-      const obs = node.subscribe(evt => {
+      const obs = node.observable.subscribe(evt => {
         if (evt.type === Enum_Event_Types.Progress) {
           if (evt.data === 1) {
             // node is done!
             costDone += costBefore;
-            node.unsubscribe(obs);
             this._emitEvent(new ModelEvent(
               this, Enum_Event_Types.Progress, costDone / totalCost));
+            obs.dispose();
           }
         }
       });
@@ -196,17 +224,6 @@ class Model {
   removeEdge(fromChildNode, toParentNode) {
     fromChildNode.removeParent(toParentNode);
     toParentNode.removeChild(fromChildNode);
-  };
-
-  /**
-   * @param {(value: DatasetEvent) => void} onNext
-   * @param {(exception: any) => void} onError
-   * @returns {Rx.Observer.<DatasetEvent>}
-   */
-  subscribe(onNext, onError = void 0) {
-    const obs = Rx.Observer.create(onNext, onError);
-    this._observers.push(obs);
-    return obs;
   };
 };
 

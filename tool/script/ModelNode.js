@@ -48,6 +48,15 @@ class ModelNode {
 
     /** @type {Array.<Rx.Observer.<ModelNodeEvent>>} */
     this._observers = [];
+
+    this._observable = Rx.Observable.create(observer => {
+      this._observers.push(observer);
+      const oldDispose = observer.dispose;
+      observer.dispose = () => {
+        this._unsubscribe(observer);
+        oldDispose.call(observer);
+      };
+    });
   };
 
   /**
@@ -58,26 +67,28 @@ class ModelNode {
   };
 
   /**
-   * @param {(value: ModelNodeEvent) => void} onNext
-   * @param {(exception: any) => void} onError
-   * @returns {Rx.IDisposable|Rx.Observer.<ModelNodeEvent>}
-   */
-  subscribe(onNext, onError = void 0) {
-    const obs = Rx.Observer.create(onNext, onError);
-    this._observers.push(obs);
-    return obs;
-  };
-
-  /**
+   * Can be called directly but it is recommended to call dispose()
+   * on the Observer/Subscription.
+   * 
    * @param {Rx.IDisposable|Rx.Observer.<ModelNodeEvent>} subscriber 
    */
-  unsubscribe(subscriber) {
+  _unsubscribe(subscriber) {
     const idx = this._observers.findIndex(o => o === subscriber);
     if (idx < 0) {
       throw new Error(`The subscriber is not currently known.`);
     }
     this._observers.splice(idx, 1);
-    subscriber.dispose();
+  };
+
+  /**
+   * Obtain the Observable for this ModelNode that emits ModelNodeEvents.
+   * This Observable never drains. To save resources, call dispose() on
+   * obtained Observers, when not longer needed.
+   * 
+   * @returns {Rx.Observable.<ModelNodeEvent>}
+   */
+  get observable() {
+    return this._observable;
   };
   
   /**
