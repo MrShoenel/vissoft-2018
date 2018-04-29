@@ -45,6 +45,7 @@ class GridboxGraph {
 
     this.graphDiv = document.querySelector('div#graph-div');
 
+    const dbgBtn = document.querySelector('button#debug-select');
     dataObservable.subscribe(evt => {
       this.dataset = evt.dataset;
       this.model = evt.model;
@@ -52,6 +53,15 @@ class GridboxGraph {
       // Initially, nothing is selected
       this._emitEvent(new GraphEvent('selection', this._selection));
       this._initGraph();
+      dbgBtn.removeAttribute('disabled');
+    });
+
+    // @RAFAEL: I added this now so that you can build up the t-SNE while
+    // I can improve the graph (esp. showing the distributions)
+    dbgBtn.addEventListener('click', () => {
+      this._emitEvent(new GraphEvent('selection', this.dataset.data.sort((a,b) => Math.random() > .5 ? 1 : -1).slice(-100).map(d => {
+        return d[this.dataset.entityIdColumn];
+      })));
     });
   };
 
@@ -95,7 +105,7 @@ class GridboxGraph {
       layerSpace: 20,
       nodeW: 60,
       nodeH: 60,
-      nodeHSpace: 10,
+      nodeHSpace: 60,
       nodeVSpace: 15
     };
     const ml = new ModelLayout(this.model, options);
@@ -121,7 +131,7 @@ class GridboxGraph {
       .attr('height', options.nodeH)
       .attr('x', d => d.x)
       .attr('y', d => d.y)
-      .attr('style', 'fill:blue,stroke:black;stroke-width:2;fill-opacity:1;stroke-opacity:0.9');
+      .attr('style', 'fill:gray;stroke:black;stroke-width:2;fill-opacity:1;stroke-opacity:0.9');
 
     gNode.selectAll('g')
       .append('text')
