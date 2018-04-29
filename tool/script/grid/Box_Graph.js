@@ -115,7 +115,7 @@ class GridboxGraph {
     var fill = d3.scaleOrdinal(
       ["#A07A19", "#AC30C0", "#EB9A72", "#BA86F5", "#EA22A8"]);
 
-    var mb = d3.forceManyBody().strength(-120).distanceMin(30);
+    var mb = d3.forceManyBody().strength(-100);
 
     var force = d3.forceSimulation(this._testJson.nodes)
       .force('charge', mb)
@@ -125,36 +125,94 @@ class GridboxGraph {
     var svg = document.querySelector('#foo-svg') ?
       d3.select('#foo-svg') : d3.select("#graph-div").append("svg:svg")
       .attr('id', 'foo-svg')
-      .attr('style', 'transform:rotate(90deg)')
+      // .attr('style', 'transform:rotate(90deg)')
       .attr("width", width)
-      .attr("height", height);
+      .attr("height", height)
+      .call(d3.zoom().scaleExtent([.5, 2]).on('zoom', () => {
+        svg.attr('transform', d3.event.transform);
+      }))
 
-    var link = svg.selectAll("line")
-      .data(this._testJson.links)
-      .enter().append("line").style('stroke', 'rgb(0,0,0');
+    var gLink = svg.append('g');
+    var gNode = svg.append('g');
 
-    var node = svg.selectAll("circle")
-      .data(this._testJson.nodes)
-      .enter().append("circle")
-      .attr("r", radius - .75)
-      .style("fill", function(d) { return fill(d.group); })
-      .style("stroke", function(d) { return d3.rgb(fill(d.group)).darker(); });
+
+
+
+    let ranAlready = false;
+    const update = data => {
+      force.nodes(data.nodes);
+      force.force('link').links(data.links);
+      force.force('charge').initialize(data.nodes);
+
+      var link = gLink.selectAll("line")
+        .data(data.links);
+
+      link.attr('class', 'update');
+
+      // Update old, then
+
+      // Create new:
+      link.enter()
+        .append("line")
+        .attr('class', 'enter')
+        .style('stroke', 'rgb(0,0,0')
+        .merge(link);
+      
+      link.exit().remove();
+
+
+      
+
+      var node = gNode.selectAll("circle")
+        .data(data.nodes);
+      
+      node.attr('class', 'update');
+
+      node
+        .enter()
+        .append("circle")
+        .attr('class', 'enter')
+        .attr("r", radius - .75)
+        .style("fill", function(d) { return fill(d.group); })
+        .style("stroke", function(d) { return d3.rgb(fill(d.group)).darker(); })
+        .merge(node);
+
+      node.exit().remove();
+
+      force.alpha(ranAlready ? .5 : 1);
+      force.restart();
+      ranAlready = true;
+    };
 
     force.on("tick", () => {
-      var k = 6 * force.alpha();
+      var k = 10 * force.alpha();
 
       // Push sources up and targets down to form a weak tree.
-      link
-        .each(function(d) { d.source.y -= k, d.target.y += k; })
+      gLink.selectAll("line")
+        // .each(function(d) { d.source.y -= k, d.target.y += k; })
+        .each(function(d) { d.target.x -= k, d.source.x += k; })
         .attr("x1", function(d) { return d.source.x; })
         .attr("y1", function(d) { return d.source.y; })
         .attr("x2", function(d) { return d.target.x; })
         .attr("y2", function(d) { return d.target.y; });
 
-      node
-        .attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; });
+      gNode.selectAll("circle")
+        .attr("cx", function(d) { return Math.max(5, Math.min(d.x, width - 5)); })
+        .attr("cy", function(d) { return Math.max(5, Math.min(d.y, width - 5)); });
     });
+
+    setTimeout(() => {
+      this._testJson.nodes.push({name:'xx'});
+      this._testJson.links.push({source:0, target:7});
+      update(this._testJson);
+
+      setTimeout(() => {
+        this._testJson.links.splice(6,1);
+        update(this._testJson);
+      }, 2000);
+    }, 2500);
+
+    update(this._testJson);
   };
 };
 
