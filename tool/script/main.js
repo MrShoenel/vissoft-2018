@@ -1,6 +1,4 @@
 import * as typedefs from './typedefs.js';
-import { Dataset } from './Dataset.js';
-import { Model, Enum_Event_Types } from './Model.js';
 import { GridboxHeader, LoadEvent } from './grid/Box_Header.js';
 import { GridboxStatus } from './grid/Box_Status.js';
 import { GridboxGraph } from './grid/Box_Graph.js';
