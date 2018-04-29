@@ -143,6 +143,18 @@ class ModelNode {
     return this._children.length * this.length**2;
   };
 
+  /**
+   * @returns {number} the depth in the model's tree. Returns 0 if this
+   * node is a metric.
+   */
+  get depth() {
+    if (this.isMetric) {
+      return 0;
+    }
+
+    return 1 + Math.max.apply(null, this._children.map(c => c.depth));
+  };
+
   async _recomputeMetric() {
     const column = this.dataset.getColumn(this.name);
     const parallel = new Parallel([

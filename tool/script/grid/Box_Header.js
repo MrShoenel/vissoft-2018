@@ -24,10 +24,14 @@ class GridboxHeader {
     this.btnOpenDefault = document.querySelector('button#btn-open-default');
 
     this.btnOpenDefault.addEventListener('click', async evt => {
-      await this.loadDefaults();
       evt.preventDefault();
       evt.stopPropagation();
+
+      this.btnOpenDefault.setAttribute('disabled', 'disabled');
+      await this.loadDefaults();
+      this.btnOpenDefault.removeAttribute('disabled');
     });
+    this.btnOpenDefault.removeAttribute('disabled');
 
     /** @type {File} */
     this.selectedData = null;

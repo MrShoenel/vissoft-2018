@@ -47,3 +47,31 @@
  * @property {number} start
  * @property {number} length
  */
+
+
+/**
+ * @typedef ModelLayoutOptions
+ * @type {Object}
+ * @property {number} width
+ * @property {number} height
+ * @property {number} nodeW
+ * @property {number} nodeH
+ * @property {number} nodeVSpace
+ * @property {number} nodeHSpace
+ * @property {number} layerSpace
+ */
+
+/**
+ * @typedef Point
+ * @type {Object}
+ * @param {number} x
+ * @param {number} y
+ */
+
+/**
+ * @typedef Edge
+ * @type {Object}
+ * @template T
+ * @property {T} from
+ * @property {T} to
+ */

@@ -1,6 +1,4 @@
 import * as typedefs from './typedefs.js';
-import { Dataset } from './Dataset.js';
-import { Model, Enum_Event_Types } from './Model.js';
 import { GridboxHeader, LoadEvent } from './grid/Box_Header.js';
 import { GridboxStatus } from './grid/Box_Status.js';
 import { GridboxGraph } from './grid/Box_Graph.js';
@@ -35,6 +33,11 @@ const run = async() => {
   // @RAFAEL: What most likely would be of interest to you is when the graph
   // changed, in particular when the selected files change. You should subscribe
   // to the GridboxGraph's observable's event 'selection'.
+
+  // @RAFAEL: Added for debug purposes, remove later and make proper subscription
+  gbGraph.observable.subscribe(evt => {
+    console.log(evt);
+  });
 };
 
 export { run };

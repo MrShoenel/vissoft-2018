@@ -47,6 +47,13 @@ class Model {
   };
 
   /**
+   * @returns {Array.<ModelNode>}
+   */
+  get allNodesArray() {
+    return Object.keys(this.allNodes).map(k => this.allNodes[k]);
+  };
+
+  /**
    * Initializes this Model from the Dataset given. If this Model had
    * been initialized earlier, then its entire current state and all
    * associated nodes are discarded.
@@ -224,6 +231,17 @@ class Model {
   removeEdge(fromChildNode, toParentNode) {
     fromChildNode.removeParent(toParentNode);
     toParentNode.removeChild(fromChildNode);
+  };
+
+  /**
+   * @returns {Array.<Edge.<ModelNode>>}
+   */
+  get edges() {
+    const edges = [];
+    this.allNodesArray.map(n => {
+      return n._children.forEach(child => edges.push({ from: child, to: n }));
+    });
+    return edges
   };
 };
 
