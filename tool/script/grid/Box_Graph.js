@@ -3,6 +3,7 @@ import * as typedefs from '../typedefs.js';
 import { LoadEvent } from './Box_Header.js';
 import { Dataset } from '../Dataset.js';
 import { Model } from '../Model.js';
+import { ModelNode } from '../ModelNode.js';
 
 
 
@@ -42,13 +43,15 @@ class GridboxGraph {
       };
     });
 
+    this.graphDiv = document.querySelector('div#graph-div');
+
     dataObservable.subscribe(evt => {
       this.dataset = evt.dataset;
       this.model = evt.model;
 
       // Initially, nothing is selected
       this._emitEvent(new GraphEvent('selection', this._selection));
-      this._testGraph();
+      this._initGraph();
     });
   };
 
@@ -85,134 +88,233 @@ class GridboxGraph {
   };
 
 
-
-  _testGraph() {
-    this._testJson = this._testJson || {
-      "nodes": [
-        {"name": "d3"},
-        {"name": "d3.svg"},
-        {"name": "d3.svg.area"},
-        {"name": "d3.svg.line"},
-        {"name": "d3.scale"},
-        {"name": "d3.scale.linear"},
-        {"name": "d3.scale.ordinal"}
-      ],
-      "links": [
-        {"source": 0, "target": 1},
-        {"source": 1, "target": 2},
-        {"source": 1, "target": 3},
-        {"source": 0, "target": 4},
-        {"source": 4, "target": 5},
-        {"source": 4, "target": 6}
-      ]
+  _initGraph() {
+    const options = {
+      height: this.graphDiv.offsetHeight,
+      width: this.graphDiv.offsetWidth,
+      layerSpace: 20,
+      nodeW: 60,
+      nodeH: 60,
+      nodeHSpace: 10,
+      nodeVSpace: 15
     };
+    const ml = new ModelLayout(this.model, options);
 
-    var width = 600,
-      height = 600,
-      radius = 6;
+    const modelNodes = ml.calculate();
 
-
-    var fill = d3.scaleOrdinal(
-      ["#A07A19", "#AC30C0", "#EB9A72", "#BA86F5", "#EA22A8"]);
-
-    var mb = d3.forceManyBody().strength(-100);
-
-    var force = d3.forceSimulation(this._testJson.nodes)
-      .force('charge', mb)
-      .force('link', d3.forceLink(this._testJson.links))
-      .force('center', d3.forceCenter(width / 2, height / 2));
-
-    var svg = document.querySelector('#foo-svg') ?
-      d3.select('#foo-svg') : d3.select("#graph-div").append("svg:svg")
+    var svg = d3.select("#graph-div").append("svg:svg")
       .attr('id', 'foo-svg')
-      // .attr('style', 'transform:rotate(90deg)')
-      .attr("width", width)
-      .attr("height", height)
-      .call(d3.zoom().scaleExtent([.5, 2]).on('zoom', () => {
-        svg.attr('transform', d3.event.transform);
-      }))
+      .attr("width", options.width)
+      .attr("height", options.height);
 
-    var gLink = svg.append('g');
-    var gNode = svg.append('g');
+    const rootG = svg.append('g');
 
+    var gLink = rootG.append('g');
+    var gNode = rootG.append('g');
 
+    gNode.selectAll('rect')
+      .data(modelNodes)
+      .enter()
+      .append('g')
+      .append('rect')
+      .attr('width', options.nodeW)
+      .attr('height', options.nodeH)
+      .attr('x', d => d.x)
+      .attr('y', d => d.y)
+      .attr('style', 'fill:blue,stroke:black;stroke-width:2;fill-opacity:1;stroke-opacity:0.9');
 
+    gNode.selectAll('g')
+      .append('text')
+      .attr('fill', 'white')
+      .attr('x', d => d.x)
+      .attr('y', d => d.y + 20)
+      .attr('font-size', 10)
+      .text(d => d.modelNode.name);
 
-    let ranAlready = false;
-    const update = data => {
-      force.nodes(data.nodes);
-      force.force('link').links(data.links);
-      force.force('charge').initialize(data.nodes);
-
-      var link = gLink.selectAll("line")
-        .data(data.links);
-
-      link.attr('class', 'update');
-
-      // Update old, then
-
-      // Create new:
-      link.enter()
-        .append("line")
-        .attr('class', 'enter')
-        .style('stroke', 'rgb(0,0,0')
-        .merge(link);
-      
-      link.exit().remove();
+    // Set the zoom so that the whole tree is visible:
+    rootG.attr('transform', `scale(${options.height / ml.totalHeight})`);
+    svg.call(d3.zoom().scaleExtent([options.height / ml.totalHeight, 5]).on('zoom', () => {
+      rootG.attr('transform', d3.event.transform);
+    }));
 
 
-      
 
-      var node = gNode.selectAll("circle")
-        .data(data.nodes);
-      
-      node.attr('class', 'update');
+    const lineGen = d3.line().curve(d3.curveCardinal);
+    gLink.selectAll('path')
+      .data(ml.allEdges)
+      .enter()
+      .append('path')
+      .attr('fill', 'none')
+      .attr('stroke', 'black')
+      .attr('d', d => {
+        return lineGen([
+          [d.from.center.x, d.from.center.y],[d.to.center.x, d.to.center.y]
+        ]);
+      });
+  };
+};
 
-      node
-        .enter()
-        .append("circle")
-        .attr('class', 'enter')
-        .attr("r", radius - .75)
-        .style("fill", function(d) { return fill(d.group); })
-        .style("stroke", function(d) { return d3.rgb(fill(d.group)).darker(); })
-        .merge(node);
 
-      node.exit().remove();
 
-      force.alpha(ranAlready ? .5 : 1);
-      force.restart();
-      ranAlready = true;
+class ModelVizNode {
+  /**
+   * 
+   * @param {ModelNode} modelNode 
+   * @param {ModelLayout} layout
+   */
+  constructor(modelNode, layout) {
+    this.modelNode = modelNode;
+    this.layout = layout;
+    this.x = 0;
+    this.y = 0;
+  };
+
+  /**
+   * @returns {Point}
+   */
+  get center() {
+    return {
+      x: this.x + .5 * this.layout.options.nodeW,
+      y: this.y + .5 * this.layout.options.nodeH
     };
+  };
+};
 
-    force.on("tick", () => {
-      var k = 10 * force.alpha();
+class ModelVizLayer {
+  constructor(layerId) {
+    this.layerId = `${layerId}`;
+    /** @type {Array.<ModelVizNode>} */
+    this.nodes = [];
+  };
 
-      // Push sources up and targets down to form a weak tree.
-      gLink.selectAll("line")
-        // .each(function(d) { d.source.y -= k, d.target.y += k; })
-        .each(function(d) { d.target.x -= k, d.source.x += k; })
-        .attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
+  /**
+   * @param {ModelVizNode} node
+   */
+  addNode(node) {
+    this.nodes.push(node);
+  };
 
-      gNode.selectAll("circle")
-        .attr("cx", function(d) { return Math.max(5, Math.min(d.x, width - 5)); })
-        .attr("cy", function(d) { return Math.max(5, Math.min(d.y, width - 5)); });
+  /**
+   * @param {ModelLayoutOptions} options
+   * @returns {this}
+   */
+  alignNodes(options) {
+    // horizontal alignment:
+    this.nodes.forEach((node, idx) => {
+      const d = node.modelNode.depth;
+      node.x = d * (options.layerSpace + options.nodeW + options.nodeHSpace);
+
+      // TODO: Improve this
+      node.y = idx * (options.nodeH + options.nodeVSpace);
     });
 
-    setTimeout(() => {
-      this._testJson.nodes.push({name:'xx'});
-      this._testJson.links.push({source:0, target:7});
-      update(this._testJson);
+    return this;
+  };
 
-      setTimeout(() => {
-        this._testJson.links.splice(6,1);
-        update(this._testJson);
-      }, 2000);
-    }, 2500);
+  /**
+   * @param {ModelLayoutOptions} options
+   * @returns {number}
+   */
+  getTotalHeight(options) {
+    return this.nodes.length === 0 ? 0 :
+      this.nodes.length * (options.nodeH + options.nodeVSpace) - options.nodeVSpace;
+  };
 
-    update(this._testJson);
+  /**
+   * @param {number} totalHeight
+   * @param {ModelLayoutOptions} options
+   * @returns {this}
+   */
+  vCenterNodes(totalHeight, options) {
+    const remainingSpace = .5 * (totalHeight - this.getTotalHeight(options));
+
+    if (remainingSpace > 0) {
+      this.nodes.forEach(n => n.y += remainingSpace);
+    }
+
+    return this;
+  };
+};
+
+
+class ModelLayout {
+  /**
+   * @param {Model} model
+   * @param {ModelLayoutOptions} options
+   */
+  constructor(model, options) {
+    this.model = model;
+    this.options = options;
+  };
+
+  /**
+   * @returns {Array.<ModelVizNode>} an array that contains all ModelVizNodes
+   */
+  calculate() {
+    /** @type {ModelVizLayer} */
+    this.rootLayer = new ModelVizLayer(0);
+
+    /** @type {Object.<string, ModelVizLayer>} */
+    this.aggLayers = {};
+
+    this.model.allNodesArray.forEach(node => {
+      if (node.isMetric) {
+        this.rootLayer.addNode(new ModelVizNode(node, this));
+      } else {
+        // put the node in the right horizontal layer
+        const depthKey = `${node.depth}`;
+        if (!this.aggLayers.hasOwnProperty(depthKey)) {
+          this.aggLayers[depthKey] = new ModelVizLayer(node.depth);
+        }
+        this.aggLayers[depthKey].addNode(new ModelVizNode(node, this));
+      }
+    });
+
+
+    this.allLayers.forEach(layer => {
+      layer.alignNodes(this.options);
+    });
+    this.allLayers.forEach(l => {
+      l.vCenterNodes(this.totalHeight, this.options);
+    });
+
+    return this.allNodes;
+  };
+
+  get allLayers() {
+    return [this.rootLayer].concat(Object.keys(this.aggLayers).map(k => this.aggLayers[k]));
+  };
+
+  /**
+   * @returns {Array.<ModelVizNode>}
+   */
+  get allNodes() {
+    /** @type {Array.<ModelVizNode>} */
+    const allNodes = [];
+    this.allLayers.forEach(layer => {
+      allNodes.push.apply(allNodes, layer.nodes);
+    });
+    return allNodes;
+  };
+
+  get totalHeight() {
+    return Math.max.apply(null,
+      this.allLayers.map(l => l.getTotalHeight(this.options)));
+  };
+
+  get allEdges() {
+    const allNodes = this.allNodes;
+
+    const findVizNode = node => {
+      return allNodes[allNodes.findIndex(n => n.modelNode === node)];
+    };
+
+    return this.model.edges.map(edge => {
+      return {
+        from: findVizNode(edge.from),
+        to: findVizNode(edge.to)
+      };
+    })
   };
 };
 
