@@ -191,7 +191,7 @@ class Model {
   };
 
   /**
-   * @param {(string?, ...optionalParams: Array) => any} fn 
+   * @param {((string) => any)} fn 
    */
   print(fn = console.log) {
     let indent = 1;
