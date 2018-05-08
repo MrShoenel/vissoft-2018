@@ -108,32 +108,111 @@ class GridboxGraph {
       nodeHSpace: 60,
       nodeVSpace: 15
     };
+
     const ml = new ModelLayout(this.model, options);
-
-    const modelNodes = ml.calculate();
-
-    var svg = d3.select("#graph-div").append("svg:svg")
+    const svg = d3.select("#graph-div").append("svg:svg")
       .attr('id', 'foo-svg')
       .attr("width", options.width)
       .attr("height", options.height);
+    
+    this.graph = new VisSoft2018Graph(svg, ml);
+    this.graph.render();
+  };
+};
 
-    const rootG = svg.append('g');
 
-    var gLink = rootG.append('g');
-    var gNode = rootG.append('g');
+class VisSoft2018Graph {
+  /**
+   * @param {d3.Selection} svg the SVG element we will attach this graph to
+   * @param {ModelLayout} modelLayout
+   */
+  constructor(svg, modelLayout) {
+    this.svg = svg;
+    this.modelLayout = modelLayout;
 
-    gNode.selectAll('rect')
-      .data(modelNodes)
+    this.rootG = svg.append('g');
+    this._gLink = this.rootG.append('g');
+    this._gNode = this.rootG.append('g');
+
+    this._dragNodesEnabled = false;
+    this._forceEnabled = true;
+
+    this.mlOptions = modelLayout.options;
+    this.modelNodes = modelLayout.calculate()
+  };
+
+  get dragNodesEnabled() {
+    return this._dragNodesEnabled;
+  };
+
+  get forceEnabled() {
+    return this._forceEnabled;
+  };
+
+  /**
+   * @param {Array.<ModelVizNode>} modelNodes
+   * @returns {Array.<Link>}
+   */
+  static _nodesLinks(modelNodes) {
+    const nodes = modelNodes.map(mn => mn.modelNode);
+    const fi = node => nodes.findIndex(n => n === node);
+
+    /** @type {Array.<Link>} */
+    const links = [];
+    for (const node of nodes) {
+      for (const child of node._children) {
+        const idx = fi(node);
+        links.push({
+          source: fi(child),
+          target: idx
+        });
+      }
+    }
+    
+    return links;
+  };
+
+  render() {
+    const force = d3.forceSimulation(this.modelNodes)
+      .force('charge', d3.forceManyBody().strength(-100))
+      .force('link', d3.forceLink(VisSoft2018Graph._nodesLinks(this.modelNodes)))
+      // .force('center', d3.forceCenter(
+      //   this.mlOptions.width / 2, this.mlOptions.height / 2));
+
+    this._gNode.selectAll('rect')
+      .data(this.modelNodes)
       .enter()
       .append('g')
-      .append('rect')
-      .attr('width', options.nodeW)
-      .attr('height', options.nodeH)
-      .attr('x', d => d.x)
-      .attr('y', d => d.y)
-      .attr('style', 'fill:gray;stroke:black;stroke-width:2;fill-opacity:1;stroke-opacity:0.9');
+      .call(d3.drag()
+        .on('start', d => {
+          if (!d3.event.active) force.alphaTarget(0.3).restart();
+          d.fx = d.x;
+          d.fy = d.y;
+        })
+        .on('drag', d => {
+          if (this._forceEnabled) {
+            d.fx = d3.event.x;
+            d.fy = d3.event.y;
+          } else {
+            d.x = d3.event.x;
+            d.y = d3.event.y;
+            this._updatePositions();
+          }
+        })
+        .on('end', d => {
+          if (!d3.event.active) force.alphaTarget(0);
+          d.fx = null;
+          d.fy = null;
+        })
+      )
+        .append('rect')
+        .attr('width', this.mlOptions.nodeW)
+        .attr('height', this.mlOptions.nodeH)
+        .attr('x', d => d.x)
+        .attr('y', d => d.y)
+        .attr('style', 'fill:gray;stroke:black;stroke-width:2;fill-opacity:1;stroke-opacity:0.9');
 
-    gNode.selectAll('g')
+    this._gNode.selectAll('g')
       .append('text')
       .attr('fill', 'white')
       .attr('x', d => d.x)
@@ -142,24 +221,66 @@ class GridboxGraph {
       .text(d => d.modelNode.name);
 
     // Set the zoom so that the whole tree is visible:
-    rootG.attr('transform', `scale(${options.height / ml.totalHeight})`);
-    svg.call(d3.zoom().scaleExtent([options.height / ml.totalHeight, 5]).on('zoom', () => {
-      rootG.attr('transform', d3.event.transform);
-    }));
-
-
-
-    const lineGen = d3.line().curve(d3.curveCardinal);
-    gLink.selectAll('path')
-      .data(ml.allEdges)
+    // this.rootG.attr('transform',
+    //   `scale(${this.mlOptions.height / this.modelLayout.totalHeight})`);
+    // this.svg.call(d3.zoom().scaleExtent([
+    //   this.mlOptions.height / this.modelLayout.totalHeight, 5
+    // ]).on('zoom', () => {
+    //   this.rootG.attr('transform', d3.event.transform);
+    // }));
+    
+    this._gLink.selectAll('line')
+      .data(this.modelLayout.allEdges)
       .enter()
-      .append('path')
+      .append('line')
       .attr('fill', 'none')
       .attr('stroke', 'black')
-      .attr('d', d => {
-        return lineGen([
-          [d.from.center.x, d.from.center.y],[d.to.center.x, d.to.center.y]
-        ]);
+      .attr('x1', d => d.from.center.x)
+      .attr('y1', d => d.from.center.y)
+      .attr('x2', d => d.to.center.x)
+      .attr('y2', d => d.to.center.y);
+    
+
+    force.on('tick', () => {
+      if (!this.forceEnabled) {
+        return;
+      }
+      const k = 10 * force.alpha();
+
+      // Push sources up and targets down to form a weak tree.
+      this._gLink.selectAll('line')
+        // .each(function(d) { d.source.y -= k, d.target.y += k; })
+        .each(function(d) {
+          d.to.x -= k, d.from.x += k;
+        });
+
+      this._updatePositions();
+    });
+
+    setTimeout(() => {
+      force.force('charge').strength(0);
+      force.force('link').strength(0);
+      this._forceEnabled = false;
+    }, 1000);
+
+    return this;
+  };
+
+  _updatePositions() {
+    const that = this;
+
+    this._gLink.selectAll('line')
+      .attr("x1", function(d) { return d.from.center.x; })
+      .attr("y1", function(d) { return d.from.center.y; })
+      .attr("x2", function(d) { return d.to.center.x; })
+      .attr("y2", function(d) { return d.to.center.y; });
+
+    this._gNode.selectAll('rect')
+      .attr("x", function(d) {
+        return Math.max(5, Math.min(d.x, that.mlOptions.width - 5));
+      })
+      .attr("y", function(d) {
+        return Math.max(5, Math.min(d.y, that.mlOptions.width - 5));
       });
   };
 };
@@ -327,11 +448,6 @@ class ModelLayout {
     })
   };
 };
-
-
-// class ModelToGraphConverter {
-//   constr
-// };
 
 
 export {
