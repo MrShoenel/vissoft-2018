@@ -20,10 +20,39 @@ const run = async() => {
 
   // Add more init stuff here..
   
-  // @RAFAEL: In your components, just subscribe to the observable of the
-  // header's component (gbHeader.observable). Any event it emits will have
-  // the dataset and the model that we should use. Then you can also subs-
-  // cribe on the model or its nodes (whatever is required there).
+  gbHeader.observable.subscribe(evt => {
+    tsne(evt);
+
+    let t;
+
+    evt.dataset.crossfilter.onChange(function(event) {
+      const rankingElem = document.getElementById("ranking");
+      const numSelElem = document.getElementById("ranking-num-sel");
+      const contentElem = document.getElementById("ranking-content");
+      const items = evt.dataset.crossfilter.allFiltered();
+      if (items.length < evt.dataset.data.length) {
+        // Debouncing
+        clearTimeout(t);
+        t = setTimeout(function() {
+          numSelElem.innerHTML = "# of selected elements: " + items.length;
+          contentElem.innerHTML = "";
+          const ul = document.createElement("ul");
+          contentElem.appendChild(ul);
+          for (let item of items) {
+            const li = document.createElement("li");
+            li.appendChild(document.createTextNode(item.name));
+            ul.appendChild(li);
+          }
+        }, 500);
+      }
+      else {
+        numSelElem.innerHTML = "# of selected elements: 0";
+        contentElem.innerHTML = "";
+      }
+
+    });
+
+  });
 
   // @RAFAEL: For any data you need access, subscribe to the model's observable
   // to get notified of changes. Currently, there is only the progress-event,
@@ -36,7 +65,8 @@ const run = async() => {
 
   // @RAFAEL: Added for debug purposes, remove later and make proper subscription
   gbGraph.observable.subscribe(evt => {
-    console.log(evt);
+    // @SEBASTIAN: I'm currently monitoring this to know when the model has finished computing
+    charts(evt);
   });
 };
 

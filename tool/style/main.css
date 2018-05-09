@@ -8,10 +8,11 @@ div#main-grid {
   display: grid;
   width: 100%;
   min-height: 600px;
-  grid-template-columns: calc(50% - 5px) calc(50% - 5px);
+  grid-template-columns: calc(35% - 5px) calc(30% - 5px) calc(35% - 5px);
   grid-column-gap: 10px;
 }
-div#main-grid > div {
+
+#graph-div {
   height: 100%;
   background-color: #ccc;
 }
@@ -25,7 +26,8 @@ div#tsne-grid {
   grid-row-gap: 10px;
 }
 div#tsne-grid > div {
-  background-color: #888;
+  border: 1px solid black;
+  background-color: #fff;
 }
 
 h3#status {
@@ -44,4 +46,47 @@ pre#log {
 }
 progress#model-load-progress {
   width: 400px;
+}
+
+#charts-col {
+  overflow: scroll;
+  max-height: 600px;
+  background-color: #fff;
+  border: 1px solid black;
+  display: grid;
+}
+
+#charts-col > p {
+  text-align: center;
+}
+
+#charts-col .chart-header {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-top: 5px;
+}
+
+#charts-col .control > input {
+  margin-left: 10px;
+}
+
+#ranking {
+  max-height: 300px;
+  overflow: scroll;
+  border: 1px solid black;
+}
+
+#ranking-title {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-top: 5px;
+}
+
+#ranking-title > span {
+  display: inline-block;
+  width: 220px;
 }

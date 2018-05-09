@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <title>VISSOFT 2018</title>
     <link rel="stylesheet" href="./style/main.css" />
+    <link rel="stylesheet" href="./style/dc.css" />
+    <link rel="stylesheet" href="./style/tsne.css" />
   </head>
   <body>
 
@@ -45,20 +47,28 @@
         -->
         <button id="debug-select" disabled="disabled">[Debug] Trigger random selection files</button>
       </div>
+      <div id="charts-col"></div>
       <div id="tsne-grid">
         <div>
-          t-SNE
-          <!--
-            @RAFAEL: Please put your T-SNE implementation here :)
-            You can use jQuery and D3 or add other libs below (but
-            please install them proper via bower)
-          -->
+          <div id='tsne-title'>
+            t-SNE plot
+            <div>
+              <span id="tsne-iter">Iterations: 0</span>
+              <span id="tsne-fin">Finished: No</span>
+            </div>
+          </div>
+          <div id='tsne'></div>
         </div>
-        <div>
-          Ranking/Selection
-          <!--
-            I will put something here soon, but first I'll do the graph!
-          -->
+        <div id='ranking'>
+          <div id="ranking-title">
+            Selection
+            <span id="ranking-num-sel"># of selected elements: 999</span>
+          </div>
+          <div id="ranking-content">
+            <!--
+              I will put something here soon, but first I'll do the graph!
+            -->
+          </div>
         </div>
       </div>
     </div>
@@ -81,6 +91,10 @@
     <script src="./node_modules/browser-es-module-loader/dist/babel-browser-build.js"></script>
     <script src="./node_modules/browser-es-module-loader/dist/browser-es-module-loader.js"></script>
 
+    <script src="./script/dc-canvas-bundle.js"></script>
+    <script src="./script/plots.js"></script>
+    <script src="./bower_components/tsnejs/tsne.js"></script>
+
     <script type="module" id="init" data-run="false">
     (async() => {
       const scriptTag = document.querySelector('script#init');
@@ -96,6 +110,7 @@
       } catch (e) {
         alert(`An error occurred: ${e}`);
       }
+
     })();
     </script>
   </body>

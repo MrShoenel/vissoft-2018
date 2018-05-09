@@ -46,9 +46,11 @@ class GridboxGraph {
     this.graphDiv = document.querySelector('div#graph-div');
 
     const dbgBtn = document.querySelector('button#debug-select');
-    dataObservable.subscribe(evt => {
+    dataObservable.subscribe(async evt => {
       this.dataset = evt.dataset;
       this.model = evt.model;
+
+      await this.model.recompute();
 
       // Initially, nothing is selected
       this._emitEvent(new GraphEvent('selection', this._selection));
