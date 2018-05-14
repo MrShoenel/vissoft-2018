@@ -75,3 +75,10 @@
  * @property {T} from
  * @property {T} to
  */
+
+/**
+ * @typedef Link
+ * @type {Object}
+ * @property {number} source
+ * @property {number} target
+ */
