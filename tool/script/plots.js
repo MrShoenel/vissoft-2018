@@ -203,7 +203,8 @@ function tsne(evt) {
 }
 
 
-function charts(evt) {  
+function charts(evt) {
+  let colorSelected = false;  
   // Sort keys in descending order by depth
   const nodeKeys = Object.keys(__model.allNodes).sort((a, b) => __model.allNodes[b].depth - __model.allNodes[a].depth);
   // Iterate through the nodes in the order computed above
@@ -252,6 +253,12 @@ function charts(evt) {
 
       radio1.onclick = () => colorChanged(cdf);
 
+      if (!colorSelected) {
+        colorSelected = true;
+        radio1.checked = true;
+        radio1.onclick();
+      }
+
       const radio1_label = document.createTextNode("color");
       controls.appendChild(radio1_label);
 
@@ -271,4 +278,5 @@ function charts(evt) {
       chart("#" + id, xLabel, yLabel, 150, true);
     }
   }
+
 }
