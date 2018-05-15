@@ -1,9 +1,14 @@
 importScripts('../bower_components/tsnejs/tsne.js');
+importScripts('./prng.js');
+
+
+const r = new Random(42);
+
+Math.random = () => r.nextFloat();
 
 self.onmessage = function (e) {
 
 	let data = e.data;
-	// console.log("About to run t-SNE");	
 
 	var opt = {}
 	opt.epsilon = 10; // epsilon is learning rate (10 = default)
@@ -29,7 +34,6 @@ self.onmessage = function (e) {
 
 	output = tsne.getSolution(); // Y is an array of 2-D points that you can plot
 
-	// console.log("Finished t-SNE");
 	postMessage({
 		output: output,
 		iter: k,
