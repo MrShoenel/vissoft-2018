@@ -207,3 +207,7 @@ div.dc-chart {
 
 .dc-hard .number-display {
   float: none; }
+
+.x-axis-label {
+  font-size: small;
+}

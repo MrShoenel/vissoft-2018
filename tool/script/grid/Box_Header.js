@@ -72,7 +72,7 @@ class GridboxHeader {
   };
 
   async loadDefaults() {
-    const defaultData = '/data/default.csv',
+    const defaultData = '/data/docs_16_comma_5000.csv',
       defaultModel = '/data/default-model.json';
     
     await this.load(defaultData, defaultModel);
