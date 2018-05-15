@@ -139,7 +139,7 @@ function changeColormap(cmap) {
   dc.redrawAll();
 }
 
-function tsne(evt) {
+function plots_init(evt) {
   // The following instructions should be on a constructor
   __data = evt.dataset.data;
   __crossfilter = evt.dataset.crossfilter;
@@ -161,11 +161,13 @@ function tsne(evt) {
   for (let row of __data) {
     __index[row.entity_id] = row;
   }
+}
 
+function tsne(evt) {
   // Initialize the columns that will hold the t-SNE results
-  for (let row of __data) {
-    row["tsne_x"] = Math.random();
-    row["tsne_y"] = Math.random();
+  for (let row of __data) {    
+    row["tsne_x"] = 0;    
+    row["tsne_y"] = 0;
   }
 
   chart("#tsne", "tsne_x", "tsne_y");
@@ -178,8 +180,27 @@ function tsne(evt) {
     }
 
     // Data pre-processing
-    let cols = Object.keys(__data[0]).filter(c => c.endsWith("(score)"));
-    let __data_score = __data.map(row => cols.map(c => +row[c]));
+    
+    // let cols = Object.keys(__data[0]).filter(c => c.endsWith("(score)"));
+    // let __data_score = __data.map(row => cols.map(c => +row[c]));
+
+    let cols = Object.keys(__model.allNodes).filter(function(k) {
+      const n = __model.allNodes[k];
+      return n.depth == 0 && n.hasState(n.state);
+    });
+    
+    let __data_score = __data.map(row => cols.map(col => __index[row.entity_id][col.replace(/\s/g, '') + "_y"]));
+
+    // console.log(__data_score);
+    
+    // let __data_score = __data.map(row => []);
+    // for (let key in __model.allNodes) {
+    //   const n = __model.allNodes[key];
+    //   if (n.depth == 0) {
+    //     const cdf = n.getComputedData()[0].data;
+    //     console.log(cdf);
+    //   }
+    // }
 
     w.postMessage(__data_score);
 

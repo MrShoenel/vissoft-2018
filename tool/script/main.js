@@ -21,7 +21,7 @@ const run = async() => {
   // Add more init stuff here..
   
   gbHeader.observable.subscribe(evt => {
-    tsne(evt);
+    plots_init(evt);
 
     let t;
 
@@ -65,8 +65,9 @@ const run = async() => {
 
   // @RAFAEL: Added for debug purposes, remove later and make proper subscription
   gbGraph.observable.subscribe(evt => {
-    // @SEBASTIAN: I'm currently monitoring this to know when the model has finished computing
+    // @SEBASTIAN: I'm currently monitoring this to know when the model has finished computing    
     charts(evt);
+    tsne(evt);
   });
 };
 
