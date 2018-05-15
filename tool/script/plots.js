@@ -203,9 +203,12 @@ function tsne(evt) {
 }
 
 
-function charts(evt) {
-  for (let node in __model.allNodes) {
-    const n = __model.allNodes[node];
+function charts(evt) {  
+  // Sort keys in descending order by depth
+  const nodeKeys = Object.keys(__model.allNodes).sort((a, b) => __model.allNodes[b].depth - __model.allNodes[a].depth);
+  // Iterate through the nodes in the order computed above
+  for (let nodeKey of nodeKeys) {
+    const n = __model.allNodes[nodeKey];    
     if (n.hasState(n.state)) {
       const id = n.name.replace(/\s/g, '');
       const cdf = n.getComputedData()[0].data;
