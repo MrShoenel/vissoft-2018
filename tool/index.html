@@ -59,16 +59,15 @@
           </div>
           <div id='tsne'></div>
         </div>
-        <div id='ranking'>
+        <div id="ranking">
           <div id="ranking-title">
             Selection
             <span id="ranking-num-sel"># of selected elements: 999</span>
           </div>
-          <div id="ranking-content">
-            <!--
-              I will put something here soon, but first I'll do the graph!
-            -->
-          </div>
+          <table id="ranking-content">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -85,15 +84,16 @@
     
 
     <script src="./bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="./bower_components/tablesorter/dist/js/jquery.tablesorter.combined.min.js"></script>
     <script src="./bower_components/d3/d3.min.js"></script>
     <script src="./bower_components/rxjs/dist/rx.all.min.js"></script>
+    <script src="./bower_components/tsnejs/tsne.js"></script>
     <script src="./node_modules/paralleljs/lib/parallel.js"></script>
     <script src="./node_modules/browser-es-module-loader/dist/babel-browser-build.js"></script>
     <script src="./node_modules/browser-es-module-loader/dist/browser-es-module-loader.js"></script>
 
     <script src="./script/dc-canvas-bundle.js"></script>
     <script src="./script/plots.js"></script>
-    <script src="./bower_components/tsnejs/tsne.js"></script>
 
     <script type="module" id="init" data-run="false">
     (async() => {
