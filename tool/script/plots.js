@@ -65,7 +65,10 @@ function chart(parent, x, y, height=-1, prob=false) {
         .symbolSize(5)
         .excludedSize(3)
         .excludedOpacity(0.5)
-        .excludedColor('#ddd');
+        .excludedColor('#ddd')
+        .emptySize(3)
+        .emptyOpacity(0.5)
+        .emptyColor('#ddd');
   }
 
   const chart = plots[parent];
