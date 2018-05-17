@@ -17,8 +17,6 @@ class GridboxList {
     let bound = false;
 
     dataObservable.subscribe(evt => {
-      tsne(evt);
-
       this.dataset = evt.dataset;
       if (!bound) {
         evt.dataset.crossfilter.onChange(this._changeCallback.bind(this));
