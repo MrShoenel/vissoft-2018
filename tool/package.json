@@ -1,7 +1,7 @@
 {
   "name": "vissoft2018-tool",
-  "version": "0.1.0",
-  "description": "A visualization tool developed as part of a paper to be submitted to VISSOFT 2018 that can visualize (joint) probabilities based on empirical CDFs.",
+  "version": "0.9.0",
+  "description": "A visualization tool developed as part of a paper to be submitted to VISSOFT 2018 that can visualize (joint) probabilities based on empirical CDFs. The preliminary name is Quality Models Inside Out.",
   "main": "index.html",
   "scripts": {
     "install": "bower install",
