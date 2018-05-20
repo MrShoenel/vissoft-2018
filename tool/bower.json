@@ -41,6 +41,7 @@
     "rxjs": "^4.1.0",
     "jquery": "^3.3.1",
     "tsnejs": "https://github.com/rafaelmessias/tsnejs.git",
-    "tablesorter": "jquery.tablesorter#^2.30.3"
+    "tablesorter": "jquery.tablesorter#^2.30.3",
+    "js-sha1": "^0.6.0"
   }
 }
