@@ -199,13 +199,13 @@ class ModelNode {
           data: c.getComputedData(Enum_Computation_Types.CDF)[0].data
         };
       });
-    const childData_CCDF = this._children.map(
-      c => {
-        return /** @type {Column} */ {
-          colName: c.name,
-          data: c.getComputedData(Enum_Computation_Types.CCDF)[0].data
-        };
-      });
+    // const childData_CCDF = this._children.map(
+    //   c => {
+    //     return /** @type {Column} */ {
+    //       colName: c.name,
+    //       data: c.getComputedData(Enum_Computation_Types.CCDF)[0].data
+    //     };
+    //   });
 
     // In this method, we parallelize over the rows. Every worker will do
     // a computation for one chunk of CDF and one chunk of CCDF.
@@ -215,7 +215,7 @@ class ModelNode {
     const parallel = new Parallel(ranges.map(range => {
       return {
         childData_CDF,
-        childData_CCDF,
+        // childData_CCDF,
         range
       }
     }), {
@@ -227,10 +227,10 @@ class ModelNode {
     const raw = await parallel.map(rangeObj => {
       const cdfChunk = computeCDF(
         rangeObj.childData_CDF, rangeObj.range.start, rangeObj.range.length, false);
-      const ccdfChunk = computeCDF(
-        rangeObj.childData_CCDF, rangeObj.range.start, rangeObj.range.length, true);
+      // const ccdfChunk = computeCDF(
+      //   rangeObj.childData_CCDF, rangeObj.range.start, rangeObj.range.length, true);
 
-      return { cdfChunk, ccdfChunk };
+      return { cdfChunk, /*ccdfChunk*/ };
     });
 
 
@@ -238,8 +238,8 @@ class ModelNode {
     this._states[this.state] = [
       ComputedData.fromChunks(
         Enum_Computation_Types.CDF, ...raw.map(r => r.cdfChunk)),
-      ComputedData.fromChunks(
-        Enum_Computation_Types.CCDF, ...raw.map(r => r.ccdfChunk))
+      // ComputedData.fromChunks(
+      //   Enum_Computation_Types.CCDF, ...raw.map(r => r.ccdfChunk))
     ];
 
     return this;
