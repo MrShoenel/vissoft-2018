@@ -2,15 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>VISSOFT 2018</title>
+    <title>Quality Models Inside Out</title>
     <link rel="stylesheet" href="./style/main.css" />
     <link rel="stylesheet" href="./style/dc.css" />
     <link rel="stylesheet" href="./style/tsne.css" />
+    <link rel="stylesheet" href="./bower_components/tablesorter/dist/css/theme.default.min.css" />
   </head>
   <body>
 
     <header>
-      <h1>VISSOFT 2018</h1>
+      <h1>Quality Models Inside Out</h1>
       <div>
         <form>
           <!-- Ugly, I know.. but it works and it's quick 'n dirty :D -->
@@ -48,16 +49,39 @@
 
     <div id="main-grid">
       <div id="graph-div">
-        <!--
-          Graph will go here, the component for that is 'GridboxGraph'.
-        -->
-        <button id="debug-select" disabled="disabled">[Debug] Trigger random selection files</button>
+        <div id="svg-controls">
+          <button id="ctrl-free">Restart Force</button>
+          <select id="ctrl-fix-after" size="1">
+            <option value="0">Do not fix nodes</option>
+            <option value=".5">Fix after 0.50 secs</option>
+            <option value=".75">Fix after 0.75 secs</option>
+            <option value="1">Fix after 1.00 secs</option>
+            <option value="1.25">Fix after 1.25 secs</option>
+            <option value="1.5">Fix after 1.50 secs</option>
+            <option value="1.75">Fix after 1.75 secs</option>
+            <option value="2">Fix after 2.00 secs</option>
+            <option value="2.25">Fix after 2.25 secs</option>
+            <option value="2.5" selected="selected">Fix after 2.50 secs</option>
+          </select>
+          <span id="zoom-indicator"></span>
+        </div>
+
+        <div id="svg-wrapper">
+          <div id="zoom-panel">
+            <div id="zoom-inner"></div>
+          </div>
+        </div>
       </div>
+
+
       <div id="charts-col"></div>
       <div id="tsne-grid">
         <div>
           <div id='tsne-title'>
             t-SNE plot
+            <div>
+              <progress id="tsne-progress" min="0" max="1" value="0"></progress>
+            </div>
             <div>
               <span id="tsne-iter">Iterations: 0</span>
               <span id="tsne-fin">Finished: No</span>
@@ -68,27 +92,53 @@
         <div id="ranking">
           <div id="ranking-title">
             Selection
-            <span id="ranking-num-sel"># of selected elements: 999</span>
+            <span id="ranking-num-sel"># of selected elements: 0</span>
+            <label for="ranking-by-node">Use node: </label>
+            <select id="ranking-by-node"></select>
           </div>
           <table id="ranking-content">
-            <thead></thead>
+            <thead>
+              <tr>
+                <th>Entity-ID</th>
+                <th>Value</th>
+              </tr>
+            </thead>
             <tbody></tbody>
           </table>
         </div>
       </div>
     </div>
+    
+
+    <p id="model-controls">
+      <button type="button" id="btn-export-model">Export Model</button>
+      <button type="button" id="btn-recomp-model">Recompute Model</button>
+      <br />
+      <label for="newnode-name">Create Node:</label>
+      <input type="text" id="newnode-name" placeholder="name" />
+      <button id="create-node">Create</button>
+      <br />
+      <label for="edges">Remove Edge:</label>
+      <select id="edges"></select>
+      <button id="remove-edge">Remove</button>
+      <br />
+      <label>Create Edge from:</label>
+      <select id="edge-from"></select>
+      to:
+      <select id="edge-to"></select>
+      <button id="create-edge">Create</button>
+    </p>
 
     <h3 id="status">Status</h3>
     <section>
       <label for="model-load-progress">Model Load Progress:</label>
       <progress id="model-load-progress" min="0" max="1" value="0"></progress>
       <button type="button" id="btn-print">Print Model</button>
-      <button type="button" id="btn-export-model">Export Model</button>
-      <button type="button" id="btn-recomp-model">Recompute Model</button>
       <pre id="log"></pre>
     </section>
     
 
+    <script src="./bower_components/js-sha1/build/sha1.min.js"></script>
     <script src="./bower_components/jquery/dist/jquery.min.js"></script>
     <script src="./bower_components/tablesorter/dist/js/jquery.tablesorter.combined.min.js"></script>
     <script src="./bower_components/d3/d3.min.js"></script>
