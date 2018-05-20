@@ -32,6 +32,7 @@ class ModelNode {
   constructor(dataset, node) {
     this.dataset = dataset;
     this.length = dataset.length;
+    this.node = node;
     this.name = node.name;
 
     /** @type {Array.<ModelNode>} */
@@ -125,6 +126,14 @@ class ModelNode {
    */
   hasState(stateId) {
     return this._states.hasOwnProperty(stateId);
+  };
+
+  /**
+   * @param {ModelNode} node 
+   * @returns {boolean}
+   */
+  hasChild(node) {
+    return this._children.find(n => n === node) instanceof ModelNode;
   };
 
   /**
