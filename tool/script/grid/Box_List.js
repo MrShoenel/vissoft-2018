@@ -1,6 +1,8 @@
 import * as typedefs from '../typedefs.js';
 import { LoadEvent } from './Box_Header.js';
 import { Dataset } from '../Dataset.js';
+import { Enum_Computation_Types } from '../ComputedData.js';
+import { ModelNode } from '../ModelNode.js';
 
 
 class GridboxList {
@@ -18,11 +20,62 @@ class GridboxList {
 
     dataObservable.subscribe(evt => {
       this.dataset = evt.dataset;
+      this.model = evt.model;
+
+      this.$table = $('table#ranking-content').tablesorter();
+      this.$select = $('select#ranking-by-node').empty();
+
       if (!bound) {
         evt.dataset.crossfilter.onChange(this._changeCallback.bind(this));
+        this.$select.on('change', _ => {
+          this._renderList(this.selectedNode);
+        });
         bound = true;
       }
+
+      this.model.allNodesArray.forEach(node => {
+        this.$select.append($('<option/>').text(node.name).attr('option', node.name));
+      });
+      // Select first root node, if any:
+      if (this.model.rootNodes.length > 0) {
+        this.$select.find('option').filter((_idx, opt) => $(opt).text() === this.model.rootNodes[0].name).attr('selected', 'selected');
+      }
     });
+  };
+
+  /**
+   * @returns {ModelNode}
+   */
+  get selectedNode() {
+    const selected = this.$select.find('option:selected').val();
+    return this.model.allNodesArray.find(node => node.name === selected);
+  };
+
+  /**
+   * 
+   * @param {ModelNode} node 
+   */
+  _renderList(node) {
+    const $tbody = this.$table.find('tbody').empty();
+    // get CDF values for selected node:
+    const cdf = node.getComputedData(Enum_Computation_Types.CDF)[0];
+
+    /** @type {CSVNumericData|d3.DSVParsedArray.<d3.DSVRowString>} */
+    const items = this.dataset.crossfilter.allFiltered();
+
+    // Now, for each element, attach a row
+    $tbody.empty();
+    items.forEach(item => {
+      const $tr = $('<tr/>'), itemId = item[this.dataset.entityIdColumn],
+        itemCdfVal = cdf.data.find(d => d.id === itemId).val;
+
+      $tr.append($('<td/>').text(itemId));
+      $tr.append($('<td/>').text(itemCdfVal.toFixed(4)));
+
+      $tr.appendTo($tbody);
+    });
+
+    this.$table.trigger('update');
   };
 
   /**
@@ -38,41 +91,7 @@ class GridboxList {
       // Debouncing
       clearTimeout(this._timeout);
       this._timeout = setTimeout(() => {
-        const $table = $('table#ranking-content'),
-          $thead = $table.find('thead'),
-          $tbody = $table.find('tbody');
-
-        // Render the header for the columns
-        $thead.empty();
-        const headers = ['ID'];
-        headers.forEach(head => $('<th/>').text(head).appendTo($thead));
-
-
-        // Now, for each element, attach a row
-        $tbody.empty();
-        items.forEach(item => {
-          const $tr = $('<tr/>');
-          headers.forEach(head => $('<td/>').text(item[this.dataset.entityIdColumn]).appendTo($tr));
-          $tr.appendTo($tbody);
-        });
-
-
-        $table.tablesorter();
-
-
-        // const rankingElem = document.getElementById("ranking");
-        // const numSelElem = document.getElementById("ranking-num-sel");
-        // const contentElem = document.getElementById("ranking-content");
-
-        // numSelElem.innerHTML = "# of selected elements: " + items.length;
-        // contentElem.innerHTML = "";
-        // const ul = document.createElement("ul");
-        // contentElem.appendChild(ul);
-        // for (let item of items) {
-        //   const li = document.createElement("li");
-        //   li.appendChild(document.createTextNode(item.name));
-        //   ul.appendChild(li);
-        // }
+        this._renderList(this.selectedNode);
       }, 500);
     }
   };
