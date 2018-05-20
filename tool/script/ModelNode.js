@@ -34,6 +34,7 @@ class ModelNode {
     this.length = dataset.length;
     this.node = node;
     this.name = node.name;
+    this.id = sha1(this.name);
 
     /** @type {Array.<ModelNode>} */
     this._children = [];
@@ -126,6 +127,14 @@ class ModelNode {
    */
   hasState(stateId) {
     return this._states.hasOwnProperty(stateId);
+  };
+
+  /**
+   * @returns {boolean} true if this is an aggregation node without any
+   * children. In that case, no CDF will be available.
+   */
+  get isEmptyAggregation() {
+    return this.isAggregate && this._children.length === 0;
   };
 
   /**

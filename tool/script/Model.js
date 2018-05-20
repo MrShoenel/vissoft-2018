@@ -289,6 +289,23 @@ class Model {
   };
 
   /**
+   * 
+   * @param {ModelNode} node 
+   * @returns {this}
+   */
+  removeNode(node) {
+    node._children.slice(0).forEach(child => {
+      this.removeEdge(child, node);
+    });
+    node._parents.slice(0).forEach(parent => {
+      this.removeEdge(node, parent);
+    });
+
+    delete this.allNodes[node.name];
+    return this;
+  };
+
+  /**
    * @returns {Array.<Edge.<ModelNode>>}
    */
   get edges() {
