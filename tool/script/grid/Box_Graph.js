@@ -82,7 +82,7 @@ class GridboxGraph {
       $input.val('');
 
       this.model.addNode(newNode);
-      this.graph.createGraph();
+      this.graph.createGraph(false);
 
       this.gbStatus.logger(`Created new aggregate-node with name '${newName}'.`);
     });
@@ -125,7 +125,6 @@ class GridboxGraph {
    * @param {LoadEvent} event the LoadEvent to emit to all observers
    */
   _emitEvent(event) {
-    console.log(event);
     this._observers.forEach(obs => obs.onNext(event));
   };
 
@@ -169,7 +168,7 @@ class GridboxGraph {
     const copy = JSON.parse(JSON.stringify(this.dataset.model));
 
     const g = this.graph.$svg.find('g')[0],
-      gTrans = /translate\((-?[0-9]+),(-?[0-9]+)\)/i.exec($(g).attr('transform'));
+      gTrans = /translate\((-?[\.0-9]+),(-?[\.0-9]+)\)/i.exec($(g).attr('transform'));
     copy.modelLayout = {
       scale: g.getBoundingClientRect().width / this.graph.$svg.width(),
       translateX: parseInt(gTrans[1], 10),
@@ -215,382 +214,6 @@ class GridboxGraph {
 };
 
 
-class VisSoft2018Graph {
-  /**
-   * @param {d3.Selection} svg the SVG element we will attach this graph to
-   * @param {ModelLayout} modelLayout
-   */
-  constructor(svg, modelLayout) {
-    this.svg = svg;
-    this.modelLayout = modelLayout;
-
-    this.rootG = svg.append('g');
-    this._gLink = this.rootG.append('g');
-    this._gNode = this.rootG.append('g');
-
-    this._dragNodesEnabled = false;
-    this._forceEnabled = true;
-
-    this.mlOptions = modelLayout.options;
-    this.modelNodes = modelLayout.calculate()
-  };
-
-  get dragNodesEnabled() {
-    return this._dragNodesEnabled;
-  };
-
-  get forceEnabled() {
-    return this._forceEnabled;
-  };
-
-  /**
-   * @param {Array.<ModelVizNode>} modelNodes
-   * @returns {Array.<Link>}
-   */
-  static _nodesLinks(modelNodes) {
-    const nodes = modelNodes.map(mn => mn.modelNode);
-    const fi = node => nodes.findIndex(n => n === node);
-
-    /** @type {Array.<Link>} */
-    const links = [];
-    for (const node of nodes) {
-      for (const child of node._children) {
-        const idx = fi(node);
-        links.push({
-          source: fi(child),
-          target: idx
-        });
-      }
-    }
-    
-    return links;
-  };
-
-  render() {
-    const force = d3.forceSimulation(this.modelNodes)
-      .force('charge', d3.forceManyBody().strength(-100))
-      .force('link', d3.forceLink(VisSoft2018Graph._nodesLinks(this.modelNodes)))
-      // .force('center', d3.forceCenter(
-      //   this.mlOptions.width / 2, this.mlOptions.height / 2));
-
-    this._gNode.selectAll('rect')
-      .data(this.modelNodes)
-      .enter()
-      .append('g')
-      .call(d3.drag()
-        .on('start', d => {
-          if (!d3.event.active) force.alphaTarget(0.3).restart();
-          d.fx = d.x;
-          d.fy = d.y;
-        })
-        .on('drag', d => {
-          if (this._forceEnabled) {
-            d.fx = d3.event.x;
-            d.fy = d3.event.y;
-          } else {
-            d.x = d3.event.x;
-            d.y = d3.event.y;
-            this._updatePositions();
-          }
-        })
-        .on('end', d => {
-          if (!d3.event.active) force.alphaTarget(0);
-          d.fx = null;
-          d.fy = null;
-        })
-      )
-        .append('rect')
-        .attr('width', this.mlOptions.nodeW)
-        .attr('height', this.mlOptions.nodeH)
-        .attr('x', d => d.x)
-        .attr('y', d => d.y)
-        .attr('style', 'fill:gray;stroke:black;stroke-width:2;fill-opacity:1;stroke-opacity:0.9');
-
-    this._gNode.selectAll('g')
-      .append('text')
-      .attr('fill', 'white')
-      .attr('x', d => d.x)
-      .attr('y', d => d.y + 20)
-      .attr('font-size', 10)
-      .text(d => d.modelNode.name);
-
-    // Set the zoom so that the whole tree is visible:
-    // this.rootG.attr('transform',
-    //   `scale(${this.mlOptions.height / this.modelLayout.totalHeight})`);
-    // this.svg.call(d3.zoom().scaleExtent([
-    //   this.mlOptions.height / this.modelLayout.totalHeight, 5
-    // ]).on('zoom', () => {
-    //   this.rootG.attr('transform', d3.event.transform);
-    // }));
-    
-    this._gLink.selectAll('line')
-      .data(this.modelLayout.allEdges)
-      .enter()
-      .append('line')
-      .attr('fill', 'none')
-      .attr('stroke', 'black')
-      .attr('x1', d => d.from.center.x)
-      .attr('y1', d => d.from.center.y)
-      .attr('x2', d => d.to.center.x)
-      .attr('y2', d => d.to.center.y);
-    
-
-    force.on('tick', () => {
-      if (!this.forceEnabled) {
-        return;
-      }
-      const k = 10 * force.alpha();
-
-      // Push sources up and targets down to form a weak tree.
-      this._gLink.selectAll('line')
-        // .each(function(d) { d.source.y -= k, d.target.y += k; })
-        .each(function(d) {
-          d.to.x -= k, d.from.x += k;
-        });
-
-      this._updatePositions();
-    });
-
-    setTimeout(() => {
-      force.force('charge').strength(0);
-      force.force('link').strength(0);
-      this._forceEnabled = false;
-    }, 1000);
-
-    return this;
-  };
-
-  _updatePositions() {
-    const that = this;
-
-    this._gLink.selectAll('line')
-      .attr("x1", function(d) { return d.from.center.x; })
-      .attr("y1", function(d) { return d.from.center.y; })
-      .attr("x2", function(d) { return d.to.center.x; })
-      .attr("y2", function(d) { return d.to.center.y; });
-
-    this._gNode.selectAll('rect')
-      .attr("x", function(d) {
-        return Math.max(5, Math.min(d.x, that.mlOptions.width - 5));
-      })
-      .attr("y", function(d) {
-        return Math.max(5, Math.min(d.y, that.mlOptions.width - 5));
-      });
-  };
-};
-
-
-
-class ModelVizNode {
-  /**
-   * 
-   * @param {ModelNode} modelNode 
-   * @param {ModelLayout} layout
-   */
-  constructor(modelNode, layout) {
-    this.modelNode = modelNode;
-    this.layout = layout;
-    this.x = 0;
-    this.y = 0;
-  };
-
-  /**
-   * @returns {Point}
-   */
-  get center() {
-    return {
-      x: this.x + .5 * this.layout.options.nodeW,
-      y: this.y + .5 * this.layout.options.nodeH
-    };
-  };
-};
-
-class ModelVizLayer {
-  constructor(layerId) {
-    this.layerId = `${layerId}`;
-    /** @type {Array.<ModelVizNode>} */
-    this.nodes = [];
-  };
-
-  /**
-   * @param {ModelVizNode} node
-   */
-  addNode(node) {
-    this.nodes.push(node);
-  };
-
-  /**
-   * @param {ModelLayoutOptions} options
-   * @returns {this}
-   */
-  alignNodes(options) {
-    // horizontal alignment:
-    this.nodes.forEach((node, idx) => {
-      const d = node.modelNode.depth;
-      node.x = d * (options.layerSpace + options.nodeW + options.nodeHSpace);
-
-      // TODO: Improve this
-      node.y = idx * (options.nodeH + options.nodeVSpace);
-    });
-
-    return this;
-  };
-
-  /**
-   * @param {ModelLayoutOptions} options
-   * @returns {number}
-   */
-  getTotalHeight(options) {
-    return this.nodes.length === 0 ? 0 :
-      this.nodes.length * (options.nodeH + options.nodeVSpace) - options.nodeVSpace;
-  };
-
-  /**
-   * @param {number} totalHeight
-   * @param {ModelLayoutOptions} options
-   * @returns {this}
-   */
-  vCenterNodes(totalHeight, options) {
-    const remainingSpace = .5 * (totalHeight - this.getTotalHeight(options));
-
-    if (remainingSpace > 0) {
-      this.nodes.forEach(n => n.y += remainingSpace);
-    }
-
-    return this;
-  };
-};
-
-class ModelLayout {
-  /**
-   * @param {Model} model
-   * @param {ModelLayoutOptions} options
-   */
-  constructor(model, options) {
-    this.model = model;
-    this.options = options;
-  };
-
-  /**
-   * @returns {Array.<ModelVizNode>} an array that contains all ModelVizNodes
-   */
-  calculate() {
-    /** @type {ModelVizLayer} */
-    this.rootLayer = new ModelVizLayer(0);
-
-    /** @type {Object.<string, ModelVizLayer>} */
-    this.aggLayers = {};
-
-    this.model.allNodesArray.forEach(node => {
-      if (node.isMetric) {
-        this.rootLayer.addNode(new ModelVizNode(node, this));
-      } else {
-        // put the node in the right horizontal layer
-        const depthKey = `${node.depth}`;
-        if (!this.aggLayers.hasOwnProperty(depthKey)) {
-          this.aggLayers[depthKey] = new ModelVizLayer(node.depth);
-        }
-        this.aggLayers[depthKey].addNode(new ModelVizNode(node, this));
-      }
-    });
-
-
-    this.allLayers.forEach(layer => {
-      layer.alignNodes(this.options);
-    });
-    this.allLayers.forEach(l => {
-      l.vCenterNodes(this.totalHeight, this.options);
-    });
-
-    return this.allNodes;
-  };
-
-  get allLayers() {
-    return [this.rootLayer].concat(Object.keys(this.aggLayers).map(k => this.aggLayers[k]));
-  };
-
-  /**
-   * @returns {Array.<ModelVizNode>}
-   */
-  get allNodes() {
-    /** @type {Array.<ModelVizNode>} */
-    const allNodes = [];
-    this.allLayers.forEach(layer => {
-      allNodes.push.apply(allNodes, layer.nodes);
-    });
-    return allNodes;
-  };
-
-  get totalHeight() {
-    return Math.max.apply(null,
-      this.allLayers.map(l => l.getTotalHeight(this.options)));
-  };
-
-  get allEdges() {
-    const allNodes = this.allNodes;
-
-    const findVizNode = node => {
-      return allNodes[allNodes.findIndex(n => n.modelNode === node)];
-    };
-
-    return this.model.edges.map(edge => {
-      return {
-        from: findVizNode(edge.from),
-        to: findVizNode(edge.to)
-      };
-    })
-  };
-};
-
-
-export {
-  GraphEvent,
-  GridboxGraph
-};
-
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
 
 class VisSoft2018Graph2 {
   /**
@@ -606,9 +229,18 @@ class VisSoft2018Graph2 {
     this.$zoomIndicator = $('span#zoom-indicator');
     this.$panel = $('div#zoom-panel');
     this.$innerPanel = $('div#zoom-inner');
+    this.$aggNodes = $('select#aggregate-nodes');
     this.$edges = $('select#edges');
     this.$edgeFrom = $('select#edge-from');
     this.$edgeTo = $('select#edge-to');
+
+    this.$btnRemoveNode = $('button#remove-node').on('click', _ => {
+      const nodeId = this.$aggNodes.find('option:selected').val(),
+        node = this.nodes.find(n => n.id === nodeId);
+      
+      this.model.removeNode(node);
+      this.createGraph(false);
+    });
 
     this.$btnCreateEdge = $('button#create-edge').on('click', _ => {
       const fromId = this.$edgeFrom.find('option:selected').val().split('_')[1],
@@ -772,13 +404,6 @@ class VisSoft2018Graph2 {
     }).trigger('resize');
   
     /**
-     * Creates the Graph
-     */
-    $('#ctrl-create-graph').bind('click', function () {
-      that.createGraph();
-    });
-  
-    /**
      * Frees all nodes when this button is clicked.
      */
     $('#ctrl-free').bind('click', function () {
@@ -908,9 +533,6 @@ class VisSoft2018Graph2 {
         .attr('id', d => 'node-fo-' + d.id)
         .attr('width', this.rectW)
         .attr('height', this.rectH)
-        .attr('class', function (e) {
-          return e.draggable ? 'draggable' : null;
-        })
         .on('click', d => {
           this.gridBox._emitEvent(new GraphEvent('nodeSelected', d));
         })
@@ -919,9 +541,6 @@ class VisSoft2018Graph2 {
             $(this).attr('transform', `translate(${d.node.x}, ${d.node.y})`);
           }
           const $t = $(this);
-          if (d.draggable) {
-            $t.addClass('draggable')
-          }
           if (d.isMetric) {
             $t.addClass('metric');
           }
@@ -931,7 +550,7 @@ class VisSoft2018Graph2 {
         .append('xhtml:body')
           .html(d => that._createNode(d).outerHtml());
 
-    this.svg.selectAll('foreignObject.draggable')
+    this.svg.selectAll('foreignObject')
       .call(d3.drag().on('drag', function(d) {
         d.x = d3.event.x, d.y = d3.event.y;
         
@@ -969,15 +588,13 @@ class VisSoft2018Graph2 {
     this.$svg.children('g').children(':not(defs)').remove();
 
     this.nodes = this.model.allNodesArray.map(n => {
-      n.id = sha1(n.name);
-      n.x = isNaN(n.node.x) ? 0 : n.node.x;
-      n.y = isNaN(n.node.y) ? 0 : n.node.y;
+      n.x = isNaN(n.x) ? (isNaN(n.node.x) ? 0 : n.node.x) : n.x;
+      n.y = isNaN(n.y) ? (isNaN(n.node.y) ? 0 : n.node.y) : n.y;
       return n;
     });
 
     this.links = [];
     this.nodes.forEach(node => {
-      node.draggable = true;
       node._children.forEach(child => {
         this.links.push({
           source: child,
@@ -986,18 +603,25 @@ class VisSoft2018Graph2 {
       });
     });
 
+
     this.$edges.empty();
     this.links
       .sort((l1, l2) => l2.target.depth - l1.target.depth)
       .forEach(link => {
         this.$edges.append($('<option/>')
           .attr('value', `${link.source.id}_${link.target.id}`)
-          .text(`${link.source.name} -> ${link.target.name}`));
+          .html(`${link.source.name}&nbsp;&nbsp;⇒&nbsp;&nbsp;${link.target.name}`));
       });
 
+    this.$aggNodes.empty();
     this.$edgeFrom.empty();
     this.$edgeTo.empty();
     this.nodes.sort((n1, n2) => n2.depth - n1.depth).forEach(node => {
+      if (node.isAggregate) {
+        this.$aggNodes.append($('<option/>').text(node.name)
+          .attr('value', node.id));
+      }
+
       this.$edgeFrom.append(
         $('<option/>').text(node.name).attr('value', `nid-from_${node.id}`)
       );
@@ -1030,4 +654,11 @@ class VisSoft2018Graph2 {
       node.fixed = fix;
     });
   };
+};
+
+
+
+export {
+  GraphEvent,
+  GridboxGraph
 };
