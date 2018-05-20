@@ -22,26 +22,31 @@ class GridboxList {
     this.$table = $('table#ranking-content').tablesorter();
     this.$select = $('select#ranking-by-node').empty();
 
+    /** @param {Array.<ModelNode>} nodes */
+    const addOptions = nodes => {
+      this.$select.empty();
+      nodes.forEach(node => {
+        const $opt = $('<option/>').text(node.name).attr('option', node.name);
+        if (node.isEmptyAggregation) {
+          $opt.attr('disabled', 'disabled');
+          $opt.text($opt.text() + ' (empty aggregate)');
+        }
+        this.$select.append($opt);
+      });
+          
+      // Select first root node, if any:
+      if (this.model.rootNodes.length > 0) {
+        this.$select.find('option').filter((_idx, opt) => $(opt).text() === this.model.rootNodes[0].name).attr('selected', 'selected');
+      }
+    };
+
+
     dataObservable.subscribe(evt => {
       this.dataset = evt.dataset;
       this.model = evt.model;
       this.model.observable.subscribe(evt => {
         if (evt.type === Enum_Event_Types.RequiresRecompute) {
-          this.$select.empty();
-
-          this.model.allNodesArray.forEach(node => {
-            const $opt = $('<option/>').text(node.name).attr('option', node.name);
-            if (node.isEmptyAggregation) {
-              $opt.attr('disabled', 'disabled');
-              $opt.text($opt.text() + ' (empty aggregate)');
-            }
-            this.$select.append($opt);
-          });
-          
-          // Select first root node, if any:
-          if (this.model.rootNodes.length > 0) {
-            this.$select.find('option').filter((_idx, opt) => $(opt).text() === this.model.rootNodes[0].name).attr('selected', 'selected');
-          }
+          addOptions(this.model.allNodesArray);
         }
       });
 
@@ -52,6 +57,8 @@ class GridboxList {
         });
         bound = true;
       }
+    
+      addOptions(this.model.allNodesArray);
     });
   };
 
