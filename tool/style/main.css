@@ -104,6 +104,10 @@ table#ranking-content tbody tr:nth-child(odd) {
   background-color: #eee;
 }
 
+span#show-model-ops {
+  cursor: pointer;
+}
+
 
 /* BELOW SVG STUFF FOR THE GRAPH */
 
@@ -138,8 +142,6 @@ foreignObject {
   outline: blue solid 1px;
   fill: none;
   overflow: hidden;
-}
-foreignObject.draggable {
   cursor: move;
 }
 foreignObject.metric {

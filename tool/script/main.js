@@ -24,6 +24,10 @@ const run = async() => {
   // Add more init stuff here..
   plots_init();
 
+  $('span#show-model-ops').on('click', _ => {
+    $('div#model-ops-wrapper').slideToggle();
+  });
+
   // @RAFAEL: For any data you need access, subscribe to the model's observable
   // to get notified of changes. Currently, there is only the progress-event,
   // but feel free to add more in the Enum_Event_Types. But I guess that may
@@ -38,7 +42,7 @@ const run = async() => {
     // @SEBASTIAN: I'm currently monitoring this to know when the model has finished computing    
     if (evt.type === 'modelRecomputed') {
       plots_data(evt);
-      charts();
+      charts(gbGraph);
       tsne();
     }
   });

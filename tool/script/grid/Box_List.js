@@ -2,6 +2,7 @@ import * as typedefs from '../typedefs.js';
 import { LoadEvent } from './Box_Header.js';
 import { Dataset } from '../Dataset.js';
 import { Enum_Computation_Types } from '../ComputedData.js';
+import { Enum_Event_Types } from '../Model.js';
 import { ModelNode } from '../ModelNode.js';
 
 
@@ -18,12 +19,31 @@ class GridboxList {
 
     let bound = false;
 
+    this.$table = $('table#ranking-content').tablesorter();
+    this.$select = $('select#ranking-by-node').empty();
+
     dataObservable.subscribe(evt => {
       this.dataset = evt.dataset;
       this.model = evt.model;
+      this.model.observable.subscribe(evt => {
+        if (evt.type === Enum_Event_Types.RequiresRecompute) {
+          this.$select.empty();
 
-      this.$table = $('table#ranking-content').tablesorter();
-      this.$select = $('select#ranking-by-node').empty();
+          this.model.allNodesArray.forEach(node => {
+            const $opt = $('<option/>').text(node.name).attr('option', node.name);
+            if (node.isEmptyAggregation) {
+              $opt.attr('disabled', 'disabled');
+              $opt.text($opt.text() + ' (empty aggregate)');
+            }
+            this.$select.append($opt);
+          });
+          
+          // Select first root node, if any:
+          if (this.model.rootNodes.length > 0) {
+            this.$select.find('option').filter((_idx, opt) => $(opt).text() === this.model.rootNodes[0].name).attr('selected', 'selected');
+          }
+        }
+      });
 
       if (!bound) {
         evt.dataset.crossfilter.onChange(this._changeCallback.bind(this));
@@ -31,14 +51,6 @@ class GridboxList {
           this._renderList(this.selectedNode);
         });
         bound = true;
-      }
-
-      this.model.allNodesArray.forEach(node => {
-        this.$select.append($('<option/>').text(node.name).attr('option', node.name));
-      });
-      // Select first root node, if any:
-      if (this.model.rootNodes.length > 0) {
-        this.$select.find('option').filter((_idx, opt) => $(opt).text() === this.model.rootNodes[0].name).attr('selected', 'selected');
       }
     });
   };
@@ -83,7 +95,6 @@ class GridboxList {
    * @returns {void}
    */
   _changeCallback(evt) {
-    console.log(evt);
     /** @type {CSVNumericData|d3.DSVParsedArray.<d3.DSVRowString>} */
     const items = this.dataset.crossfilter.allFiltered();
 

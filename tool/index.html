@@ -112,21 +112,27 @@
 
     <p id="model-controls">
       <button type="button" id="btn-export-model">Export Model</button>
-      <button type="button" id="btn-recomp-model">Recompute Model</button>
-      <br />
-      <label for="newnode-name">Create Node:</label>
-      <input type="text" id="newnode-name" placeholder="name" />
-      <button id="create-node">Create</button>
-      <br />
-      <label for="edges">Remove Edge:</label>
-      <select id="edges"></select>
-      <button id="remove-edge">Remove</button>
-      <br />
-      <label>Create Edge from:</label>
-      <select id="edge-from"></select>
-      to:
-      <select id="edge-to"></select>
-      <button id="create-edge">Create</button>
+      <button type="button" id="btn-recomp-model">Re-compute Model</button>
+      <span id="show-model-ops">Show/hide Model Operations ▼▲</span>
+      <div id="model-ops-wrapper" style="display: none;">
+        <label for="aggregate-nodes">Remove Node:</label>
+        <select id="aggregate-nodes"></select>
+        <button id="remove-node">Remove</button>
+        <br />
+        <label for="newnode-name">Create Node:</label>
+        <input type="text" id="newnode-name" placeholder="name" />
+        <button id="create-node">Create</button>
+        <br />
+        <label for="edges">Remove Edge:</label>
+        <select id="edges"></select>
+        <button id="remove-edge">Remove</button>
+        <br />
+        <label>Create Edge from:</label>
+        <select id="edge-from"></select>
+        to:
+        <select id="edge-to"></select>
+        <button id="create-edge">Create</button>
+      </div>
     </p>
 
     <h3 id="status">Status</h3>

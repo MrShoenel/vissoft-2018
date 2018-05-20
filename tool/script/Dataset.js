@@ -86,7 +86,9 @@ class Dataset {
     const newNode = new ModelNode(this, {
       name: name,
       useColumn: false,
-      sources: []
+      sources: [],
+      x: 1,
+      y: 1
     });
 
     this.model.model.push(newNode.node);

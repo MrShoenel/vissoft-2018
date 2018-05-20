@@ -232,11 +232,25 @@ function tsne() {
 
 
 
-function charts() {
+function charts(gridBoxGraph) {
   const parent = document.getElementById("charts-col");
   // const $body = $('foreignObject#node-fo-' + n.id + ' body')
   //   .append($('<div/>').attr('id', `_chart-${n.id}`));
   // const parent = $body.find(`div#_chart-${n.id}`)[0];
+
+  gridBoxGraph.observable.subscribe(evt => {
+    if (evt.type === 'nodeSelected') {
+      const $plotDiv = $(`div[data-node-id=${evt.data.id}]`).prev('div.chart-header'), $parent = $plotDiv.parent();
+
+      if ($plotDiv.length === 0) {
+        return; // Happens if there is no plot for the node..
+      }
+
+      $parent.scrollTop(0);
+      $plotDiv.parent().scrollTop(
+        $plotDiv.position().top - $plotDiv.parent().position().top);
+    }
+  });
 
   let colorSelected = false;
   // Sort keys in descending order by depth
@@ -244,7 +258,7 @@ function charts() {
   // Iterate through the nodes in the order computed above
   for (let nodeKey of nodeKeys) {
     const n = __model.allNodes[nodeKey];    
-    if (n.hasState(n.state)) {
+    if (n.hasState(n.state) && !n.isEmptyAggregation) {
       const id = n.name.replace(/\s/g, '');
       const cdf = n.getComputedData()[0].data;
       
@@ -310,6 +324,7 @@ function charts() {
 
       const div = document.createElement("div");
       div.id = id.replace(/\s/g, '');
+      $(div).attr('data-node-id', n.id);
       parent.appendChild(div);
 
       chart("#" + id, xLabel, yLabel, 150, true);
