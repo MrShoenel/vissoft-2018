@@ -1,6 +1,7 @@
 html {
   background: url(grained.jpg) repeat;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-y: scroll;
 }
 
 div#main-grid {
