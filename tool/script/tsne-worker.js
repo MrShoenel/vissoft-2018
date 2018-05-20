@@ -20,14 +20,17 @@ self.onmessage = function (e) {
 	// initialize data. Here we have 3 points and some example pairwise dissimilarities
 	tsne.initDataRaw(data);
 
-	for(var k = 0; k < 300; k++) {
+	const iterations = 300;
+
+	for(var k = 0; k < iterations; k++) {
 		tsne.step(); // every time you call this, solution gets better
-		if (k % 10 == 0) {
+		if ((k % 2) === 0) { // Works with 2 instead of 10
 			output = tsne.getSolution(); // Y is an array of 2-D points that you can plot
 			postMessage({
 				output: output,
 				iter: k,
-				finished: false
+				finished: false,
+				progress: k / iterations
 			});
 		}
 	}
@@ -37,6 +40,7 @@ self.onmessage = function (e) {
 	postMessage({
 		output: output,
 		iter: k,
-		finished: true
+		finished: true,
+		progress: 1
 	});
 }

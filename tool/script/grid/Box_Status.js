@@ -23,27 +23,15 @@ class GridboxStatus {
     })();
 
     this.pre = document.querySelector('pre#log');
-    this.progress = document.querySelector('progress');
+    this.progress = document.querySelector('progress#model-load-progress');
     
     this.btnPrint = document.querySelector('button#btn-print');
     this.btnPrint.addEventListener('click', () => this._model.print(this.logger.bind(this)));
     this.btnPrint.setAttribute('disabled', 'disabled');
 
-    this.btnExport = document.querySelector('button#btn-export-model');
-    this.btnExport.addEventListener('click', () => this.export());
-    this.btnExport.setAttribute('disabled', 'disabled');
-
-    this.btnRecomp = document.querySelector('button#btn-recomp-model');
-    this.btnRecomp.setAttribute('disabled', 'disabled');
-    this.btnRecomp.addEventListener('click', async() => {
-      this.btnRecomp.setAttribute('disabled', 'disabled');
-      await this.recompute();
-    });
-
     dataObservable.subscribe(evt => {
       this.dataset = evt.dataset;
       this.model = evt.model;
-      this.btnRecomp.removeAttribute('disabled');
     });
   };
 
@@ -68,11 +56,14 @@ class GridboxStatus {
     this._model = value;
 
     this.btnPrint.removeAttribute('disabled');
-    this.btnExport.removeAttribute('disabled');
 
     let lastProgress = 0;
     const obs = this._model.observable.subscribe(evt => {
-      if (evt.type === Enum_Event_Types.Progress) {
+      if (evt.type === Enum_Event_Types.RequiresRecompute) {
+        this.logger(`The Model has changed and needs to be re-computed. The cost is ${evt.data}`);
+        lastProgress = 0;
+        this.progress.value = 0;
+      } else if (evt.type === Enum_Event_Types.Progress) {
         if (evt.data > lastProgress) {
           lastProgress = evt.data;
           this.progress.value = evt.data;
@@ -80,28 +71,6 @@ class GridboxStatus {
         }
       }
     });
-  };
-
-  export() {
-    var element = document.createElement('a');
-    element.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this._dataset.model, null, "\t")));
-    element.setAttribute('download', `model-${+new Date}.json`);
-
-    element.style.display = 'none';
-    document.body.appendChild(element);
-
-    element.click();
-
-    document.body.removeChild(element);
-  };
-
-  async recompute() {
-    const start = +new Date;
-    await this._model.recompute();
-    this.logger(
-      `Model is computed and up-2-date! Computation took ${(+new Date) - start}ms`);
-    this.logger(
-      `Model recomputation cost is: ${this._model.recomputeCost} (should be 0 now)`);
   };
 
   /**

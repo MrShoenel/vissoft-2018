@@ -1,4 +1,5 @@
 import * as typedefs from './typedefs.js';
+import { ModelNode } from './ModelNode.js';
 
 // Cannot import crossfilter normally due to the fact that 'dc-canvas' was built with browserify as
 // a bundle with outdated dependencies. Not sure if there is a better way to do this?
@@ -75,6 +76,21 @@ class Dataset {
    */
   hasColumn(name) {
     return this.columns.findIndex(c => c === name) >= 0;
+  };
+
+  /**
+   * 
+   * @param {string} name 
+   */
+  addNewNode(name) {
+    const newNode = new ModelNode(this, {
+      name: name,
+      useColumn: false,
+      sources: []
+    });
+
+    this.model.model.push(newNode.node);
+    return newNode; // To be added to an instance of Model
   };
 
   static async fromDataAndQm(pathToData, pathToQm) {

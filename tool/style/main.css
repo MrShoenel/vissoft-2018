@@ -7,27 +7,30 @@ div#main-grid {
   margin-top: 2.5em;
   display: grid;
   width: 100%;
-  min-height: 600px;
+  height: 600px;
   grid-template-columns: calc(35% - 5px) calc(30% - 5px) calc(35% - 5px);
   grid-column-gap: 10px;
 }
 
-#graph-div {
+div#graph-div {
+  border: 1px solid black;
   height: 100%;
+  max-height: 100%;
   background-color: #ccc;
 }
 
 div#tsne-grid {
   background: transparent !important;
   display: grid;
-  min-height: 600px;
   height: 100%;
+  max-height: 100%;
   grid-template-rows: calc(50% - 5px) calc(50% - 5px);
   grid-row-gap: 10px;
 }
 div#tsne-grid > div {
   border: 1px solid black;
   background-color: #fff;
+  overflow-y: hidden; /* TODO: THIS NEEDS TO BE FIXED so that the SVG is less high than there is space */
 }
 
 h3#status {
@@ -89,4 +92,72 @@ progress#model-load-progress {
 #ranking-title > span {
   display: inline-block;
   width: 220px;
+}
+
+table#ranking-content {
+  width: 100%;
+  margin-top: 1em;
+  text-align: left;
+}
+
+table#ranking-content tbody tr:nth-child(odd) {
+  background-color: #eee;
+}
+
+
+/* BELOW SVG STUFF FOR THE GRAPH */
+
+div#svg-wrapper {
+  position: relative;
+}
+div#svg-controls {
+  padding-bottom: 1ex;
+}
+line {
+  fill: none;
+  stroke: #444;
+  stroke-width: 3px;
+}
+div#zoom-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 2px solid #eee;
+  border-width: 0 0 1px 1px;
+  background-color: #fff;
+  background-color: rgba(255,255,255,.5);
+  overflow: hidden;
+}
+div#zoom-inner {
+  background-color: blue;
+  background-color: rgba(0,0,255,.33);
+  position: absolute;
+}
+
+foreignObject {
+  outline: blue solid 1px;
+  fill: none;
+  overflow: hidden;
+}
+foreignObject.draggable {
+  cursor: move;
+}
+foreignObject.metric {
+  outline-color: red;
+}
+foreignObject > body {
+  margin: 0;
+  padding: 0;
+  background-color: #fff;
+  height: 100%;
+}
+foreignObject > body > div {
+  margin: 0;
+  padding: 0;
+}
+foreignObject > body > div h4 {
+  margin: 0 0 .5ex;
+  padding: .5ex;
+  background-color: #fff;
+  word-wrap: break-word;
 }
