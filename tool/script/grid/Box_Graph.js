@@ -512,6 +512,8 @@ class VisSoft2018Graph2 {
     return $('<div/>')
       .append(
         $('<h4/>').text(node.name)
+      ).append(
+        $('<p/>').text(node.desc)
       );
   };
 

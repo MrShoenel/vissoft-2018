@@ -13,6 +13,7 @@
  * @typedef JsonModelNode
  * @type {Object}
  * @property {string} name
+ * @property {string} [desc] an optional description
  * @property {boolean} useColumn
  * @property {Array.<CSVColumn|JsonModelNode>} sources
  * @property {number} [x] an optional x-coordinate
