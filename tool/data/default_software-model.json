@@ -14,22 +14,27 @@
     "sources": []
   }, {
     "name": "DAC",
+    "desc": "Data Abstraction Coupling",
     "useColumn": true,
     "sources": []
   }, {
     "name": "DIT",
+    "desc": "Depth of Inheritance Tree",
     "useColumn": true,
     "sources": []
   }, {
     "name": "ILCOM",
+    "desc": "Improvement of LCOM",
     "useColumn": true,
     "sources": []
   }, {
     "name": "LCOM",
+    "desc": "Lack of Cohesion in Methods",
     "useColumn": true,
     "sources": []
   }, {
     "name": "LD",
+    "desc": "Locality of Data",
     "useColumn": true,
     "sources": []
   }, {
@@ -38,14 +43,17 @@
     "sources": []
   }, {
     "name": "LOC",
+    "desc": "Lines of Code",
     "useColumn": true,
     "sources": []
   }, {
     "name": "MPC",
+    "desc": "Message Passing Coupling",
     "useColumn": true,
     "sources": []
   }, {
     "name": "LOD_Class",
+    "desc": "Lack of Documentation (Class Level)",
     "useColumn": true,
     "sources": []
   }, {
@@ -54,26 +62,32 @@
     "sources": []
   }, {
     "name": "NOC",
+    "desc": "Number of Children",
     "useColumn": true,
     "sources": []
   }, {
     "name": "NOM",
+    "desc": "Number of local Methods",
     "useColumn": true,
     "sources": []
   }, {
     "name": "RFC",
+    "desc": "Response For a Class",
     "useColumn": true,
     "sources": []
   }, {
     "name": "TCC",
+    "desc": "Tight Class Cohesion",
     "useColumn": true,
     "sources": []
   }, {
     "name": "WMC",
+    "desc": "Weighted Method Count",
     "useColumn": true,
     "sources": []
   },{
     "name": "CBO",
+    "desc": "Coupling between Objects",
     "useColumn": true,
     "sources": []
   },
