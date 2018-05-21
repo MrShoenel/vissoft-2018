@@ -34,7 +34,7 @@ class ModelNode {
     this.length = dataset.length;
     this.node = node;
     this.name = node.name;
-    this.desc = node.desc || '<none>';
+    this.desc = node.desc || '';
     this.id = sha1(this.name);
 
     /** @type {Array.<ModelNode>} */
