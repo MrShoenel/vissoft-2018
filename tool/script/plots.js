@@ -332,3 +332,7 @@ function charts(gridBoxGraph) {
   }
 
 }
+
+function redrawAll() {
+  dc.redrawAll();
+}
