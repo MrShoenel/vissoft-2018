@@ -25,11 +25,14 @@ class GridboxList {
     /** @param {Array.<ModelNode>} nodes */
     const addOptions = nodes => {
       this.$select.empty();
-      nodes.forEach(node => {
+      nodes.sort((n1, n2) => n2.depth - n1.depth).forEach(node => {
         const $opt = $('<option/>').text(node.name).attr('option', node.name);
         if (node.isEmptyAggregation) {
           $opt.attr('disabled', 'disabled');
           $opt.text($opt.text() + ' (empty aggregate)');
+        } else if (node.isMetric && node._parents.length === 0) {
+          $opt.attr('disabled', 'disabled');
+          $opt.text($opt.text() + ' (not connected)');
         }
         this.$select.append($opt);
       });

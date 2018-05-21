@@ -15,7 +15,7 @@
       <div>
         <form>
           <!-- Ugly, I know.. but it works and it's quick 'n dirty :D -->
-          <table>
+          <table style="width: 100%;">
             <tbody>
               <tr>
                 <td>
@@ -30,16 +30,15 @@
               <tr>
                 <td><input type="file" id="input-data" /></td>
                 <td><input type="file" id="input-model" /></td>
+                <td>
+                  <label for="anon-data">Anonymyie?</label>
+                  <input type="checkbox" id="anon-data" />
+                </td>
                 <td><button type="button" id="btn-open" disabled="disabled">Open selected data and model</button></td>
                 <td>
                   <button disabled="disabled" type="button" id="btn-open-default">Open default data and model</button>
                 </td>
-                <!-- talk about being ugly :P -->
-                <td width=100></td>
-                <td>Colormap:</td>
-                <td>
-                  <select id="sel_colormap"></select>
-                </td>
+                <td>Colormap:&nbsp;<select id="sel_colormap"></select></td>
               </tr>
             </tbody>
           </table>

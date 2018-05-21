@@ -23,6 +23,8 @@ class Dataset {
     this.dataSource = dataSource;
     this.modelSource = modelSource;
 
+    this.isAnon = false;
+
     this.entityIdColumn = model.entityId.generateColName;
 
     for (const row of data) {
@@ -31,6 +33,13 @@ class Dataset {
 
     // Notice that no dimensions are created for now; they will be created on demand later.
     this.crossfilter = crossfilter(this.data);
+  };
+
+  /**
+   * @returns {boolean}
+   */
+  get isAnonymized() {
+    return this.isAnon;
   };
 
   /**
@@ -83,6 +92,25 @@ class Dataset {
    */
   hasColumn(name) {
     return this.columns.findIndex(c => c === name) >= 0;
+  };
+
+  /**
+   * Hashes all entities' ID using SHA1 and 20 bytes
+   * 
+   * @returns {this}
+   */
+  anonymize() {
+    if (this.isAnonymized) {
+      throw new Error('This Dataset is already anonymized.');
+    }
+
+    this.data.forEach(d => {
+      d[this.entityIdColumn] = sha1(d[this.entityIdColumn]).substr(0, 20);
+    });
+
+    this.isAnon = true;
+
+    return this;
   };
 
   /**

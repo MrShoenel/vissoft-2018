@@ -16,7 +16,7 @@ div#main-grid {
 div#graph-div {
   border: 1px solid black;
   height: 100%;
-  max-height: 100%;
+  max-height: 600px;
   background-color: #ccc;
 }
 
@@ -24,7 +24,7 @@ div#tsne-grid {
   background: transparent !important;
   display: grid;
   height: 100%;
-  max-height: 100%;
+  max-height: 600px;
   grid-template-rows: calc(50% - 5px) calc(50% - 5px);
   grid-row-gap: 10px;
 }

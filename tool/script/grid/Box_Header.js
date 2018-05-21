@@ -146,6 +146,10 @@ class GridboxHeader {
     this.model = new Model(this.dataset);
     this._emitEvent(new LoadEvent(this.dataset, this.model));
 
+    if ($('input#anon-data').is(':checked')) {
+      this.dataset.anonymize();
+    }
+
     this.gbStatus.logger(
       `Model recomputation cost is: ${this.model.recomputeCost}`);
     this.gbStatus.logger(
