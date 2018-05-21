@@ -292,8 +292,8 @@ class VisSoft2018Graph2 {
     };
 
 
-    this.rectW = 80;
-    this.rectH = 50;
+    this.rectW = 120;
+    this.rectH = 134;
     this.currentScale = .5;
     this.currentTranslate = [0, 0];
     
@@ -327,7 +327,7 @@ class VisSoft2018Graph2 {
 
     this.force = d3.forceSimulation()
       .force('link', d3.forceLink().distance(125))
-      .force('charge', d3.forceManyBody().strength(-10000))
+      .force('charge', d3.forceManyBody().strength(-13500))
       .force('gravityX', d3.forceX().strength(.5).x(this.options.width))
       .force('gravityY', d3.forceY().strength(.5).y(this.options.height));
 
@@ -342,11 +342,11 @@ class VisSoft2018Graph2 {
       .insert('svg:marker', ':first-child')
       .attr('id', String)
       .attr('viewBox', '0 -5 10 10')
-      .attr('refX', 10)
+      .attr('refX', 9)
       .attr('refY', 0)
       .attr('fill', 'darkblue')
-      .attr('markerWidth', 11)
-      .attr('markerHeight', 11)
+      .attr('markerWidth', 7)
+      .attr('markerHeight', 7)
       .attr('orient', 'auto')
       .append('svg:path')
         .attr('d', 'M0,-5L10,0L0,5');
@@ -509,11 +509,50 @@ class VisSoft2018Graph2 {
    * @return {jQuery} the created div containing the elements
    */
   _createNode(node) {
+    const colors = ['olivegreen', 'magenta', 'red', 'green', 'orange', 'goldenrod', 'cyan'];
+    // depth, numC, numP, isM, isAg, isEmpAgg
     return $('<div/>')
+      .addClass('node-wrapper')
       .append(
-        $('<h4/>').text(node.name)
+        $('<h4/>').text(node.name).attr('title', node.desc)
       ).append(
-        $('<p/>').text(node.desc)
+        $('<div/>')
+          .attr('title', `Depth: ${node.depth} / ${this.model.maxDepth}`)
+          .addClass('meter-outer')
+          .append(
+            $('<div/>')
+              .addClass('meter-inner')
+              .css('width', (100 * (node.depth + 1) / (this.model.maxDepth + 1)) + '%')
+          )
+      ).append(
+        $('<table/>')
+          .css('background-color', `dark${colors[node.depth]}`)
+          .addClass('node-props')
+          .append(
+            $('<tr/>')
+              .append($('<td/>').text('isMetric:'))
+              .append($('<td/>').text(node.isMetric ? 'true' : 'false'))
+          ).append(
+            $('<tr/>')
+              .append($('<td/>').text('isAggregate:'))
+              .append($('<td/>').text(node.isAggregate ? 'true' : 'false'))
+          ).append(
+            $('<tr/>')
+              .append($('<td/>').text('isEmpytAgg:'))
+              .append($('<td/>').text(node.isEmptyAggregation ? 'true' : 'false'))
+          ).append(
+            $('<tr/>')
+              .append($('<td/>').text('depth:'))
+              .append($('<td/>').text(node.depth))
+          ).append(
+            $('<tr/>')
+              .append($('<td/>').text('children:'))
+              .append($('<td/>').text(node._children.length))
+          ).append(
+            $('<tr/>')
+              .append($('<td/>').text('parents:'))
+              .append($('<td/>').text(node._parents.length))
+          )
       );
   };
 
@@ -546,11 +585,9 @@ class VisSoft2018Graph2 {
           if (d.isMetric) {
             $t.addClass('metric');
           }
-
-          $t.css('outline-width', 1 + d.depth * 3);
         })
         .append('xhtml:body')
-          .html(d => that._createNode(d).outerHtml());
+          .html(d => that._createNode(d, that.model).outerHtml());
 
     this.svg.selectAll('foreignObject')
       .call(d3.drag().on('drag', function(d) {

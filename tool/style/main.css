@@ -17,7 +17,7 @@ div#graph-div {
   border: 1px solid black;
   height: 100%;
   max-height: 600px;
-  background-color: #ccc;
+  background-color: #fff;
 }
 
 div#tsne-grid {
@@ -31,7 +31,7 @@ div#tsne-grid {
 div#tsne-grid > div {
   border: 1px solid black;
   background-color: #fff;
-  overflow-y: hidden; /* TODO: THIS NEEDS TO BE FIXED so that the SVG is less high than there is space */
+  overflow-y: scroll;
 }
 
 h3#status {
@@ -99,10 +99,18 @@ table#ranking-content {
   width: 100%;
   margin-top: 1em;
   text-align: left;
+
+}
+table#ranking-content tbody tr td:nth-child(1),
+table#ranking-content tbody tr td:nth-child(2) {
+  cursor: pointer;
 }
 
 table#ranking-content tbody tr:nth-child(odd) {
   background-color: #eee;
+}
+div#model-ops-wrapper table tr td:first-child {
+  text-align: right;
 }
 
 span#show-model-ops {
@@ -140,29 +148,56 @@ div#zoom-inner {
 }
 
 foreignObject {
-  outline: blue solid 1px;
   fill: none;
   overflow: hidden;
   cursor: move;
 }
-foreignObject.metric {
-  outline-color: red;
-}
 foreignObject > body {
   margin: 0;
   padding: 0;
-  background-color: #fff;
+  background-color: transparent;
   height: 100%;
+  border-radius: 6px;
 }
-foreignObject > body > div {
+div.node-wrapper {
   margin: 0;
   padding: 0;
+  background-color: #eee;
+  border-radius: 6px;
+  border: 1px solid #000;
+  height: calc(100% - 2px);
 }
-foreignObject > body > div h4 {
-  margin: 0 0 .5ex;
-  padding: .5ex;
-  background-color: #fff;
+div.node-wrapper h4 {
+  margin: 0 0 3px;
+  padding: 3px;
   word-wrap: break-word;
+  font-size: 14px;
+  line-height: 16px;
+  height: 32px;
+}
+div.node-wrapper div.meter-outer {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  height: 4px;
+  border: 1px solid #bbb;
+  border-width: 1px 0 0;
+}
+div.node-wrapper div.meter-inner {
+  height: 100%;
+  background-color: darkblue;
+}
+div.node-wrapper table.node-props {
+  display: block;
+  margin: 0;
+  padding: 0;
+  color: #fff;
+  font-family: Consolas, 'Courier New', Courier, monospace;
+  font-weight: 100;
+}
+div.node-wrapper table.node-props tr {
+  font-size: 10px;
+  line-height: 10px;
 }
 
 #ranking-content > tbody > tr {
