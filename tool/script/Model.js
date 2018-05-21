@@ -59,6 +59,13 @@ class Model {
   };
 
   /**
+   * @returns {number} the maximum depth across all nodes
+   */
+  get maxDepth() {
+    return Math.max(...this.allNodesArray.map(n => n.depth));
+  };
+
+  /**
    * Initializes this Model from the Dataset given. If this Model had
    * been initialized earlier, then its entire current state and all
    * associated nodes are discarded.
