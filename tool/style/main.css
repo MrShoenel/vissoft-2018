@@ -164,3 +164,13 @@ foreignObject > body > div h4 {
   background-color: #fff;
   word-wrap: break-word;
 }
+
+#ranking-content > tbody > tr {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                supported by Chrome and Opera */
+}
