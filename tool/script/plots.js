@@ -310,7 +310,7 @@ function charts(gridBoxGraph) {
         radio1.onclick();
       }
 
-      const radio1_label = document.createTextNode("color");
+      const radio1_label = document.createTextNode("set as color input");
       controls.appendChild(radio1_label);
 
       // const radio2 = document.createElement("input");
