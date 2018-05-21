@@ -506,13 +506,22 @@ class VisSoft2018Graph2 {
    * Creates the box the node or value is visually contained within.
    *
    * @param {ModelNode} node
+   * @param {Model} model
    * @return {jQuery} the created div containing the elements
    */
-  _createNode(node) {
+  _createNode(node, model) {
     return $('<div/>')
       .append(
-        $('<h4/>').text(node.name)
-      );
+        $('<h4/>')
+          .text(node.name)
+          .addClass(node.isMetric ? 'metric' : 'aggregate')
+      ).append($('<meter/>').attr({
+        min: 0,
+        max: model.maxDepth + 1,
+        value: node.depth + 1,
+        low: 1,
+        high: model.maxDepth
+      }))
   };
 
   /**
@@ -526,29 +535,32 @@ class VisSoft2018Graph2 {
     // Restart the layout.
     this.force.restart();
 
-    this.svg.selectAll('foreignObject')
+    const foreignObjects = this.svg.selectAll('foreignObject')
       .data(this.nodes)
       .enter()
       .append('svg:foreignObject')
         .attr('id', d => 'node-fo-' + d.id)
         .attr('width', this.rectW)
-        .attr('height', this.rectH)
+        // .attr('height', this.rectH)
         .on('click', d => {
           this.gridBox._emitEvent(new GraphEvent('nodeSelected', d));
-        })
-        .each(function(d) {
-          if (!isNaN(d.node.x)) {
-            $(this).attr('transform', `translate(${d.node.x}, ${d.node.y})`);
-          }
-          const $t = $(this);
-          if (d.isMetric) {
-            $t.addClass('metric');
-          }
+        });
+    
+    foreignObjects.append('xhtml:body')
+      .html(d => that._createNode(d, that.model).outerHtml());
 
-          $t.css('outline-width', 1 + d.depth * 3);
-        })
-        .append('xhtml:body')
-          .html(d => that._createNode(d).outerHtml());
+    foreignObjects.each(function(d) {
+      if (!isNaN(d.node.x)) {
+        $(this).attr('transform', `translate(${d.node.x}, ${d.node.y})`);
+      }
+      const $t = $(this), $body = $t.find('body'), $div = $body.find('>div');
+      if (d.isMetric) {
+        $t.addClass('metric');
+      }
+
+      // $div.css('border-width', 1 + d.depth * 3);
+      $t.attr('height', Math.max(that.rectH, $body.outerHeight(true), $div.outerHeight(true)));
+    });
 
     this.svg.selectAll('foreignObject')
       .call(d3.drag().on('drag', function(d) {

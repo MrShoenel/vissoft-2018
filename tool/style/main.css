@@ -140,27 +140,37 @@ div#zoom-inner {
 }
 
 foreignObject {
-  outline: blue solid 1px;
   fill: none;
   overflow: hidden;
   cursor: move;
 }
-foreignObject.metric {
-  outline-color: red;
-}
 foreignObject > body {
   margin: 0;
   padding: 0;
-  background-color: #fff;
+  background-color: transparent;
   height: 100%;
+  overflow: hidden; /* Note that we resize the FO to fit the body */
 }
+foreignObject > body > div {
+  background-color: #fff;
+  /* border: 2px solid blue; */
+  border-radius: 6px;
+}
+/* foreignObject.metric body > div {
+  border-color: red;
+} */
 foreignObject > body > div {
   margin: 0;
   padding: 0;
 }
 foreignObject > body > div h4 {
-  margin: 0 0 .5ex;
+  margin: 0;
   padding: .5ex;
-  background-color: #fff;
   word-wrap: break-word;
+}
+foreignObject > body meter {
+  height: 5px;
+  border: none;
+  width: 100%;
+  display: block;
 }
