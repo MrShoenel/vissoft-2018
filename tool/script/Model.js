@@ -9,7 +9,12 @@ const Enum_Event_Types = Object.freeze({
   /**
    * When emitted, the corresponding value is in the range [0,1]
    */
-  Progress: 'Progress'
+  Progress: 'Progress',
+
+  /**
+   * When emitted, signals that the model needs to be re-computed.
+   */
+  RequiresRecompute: 'RequiresRecompute'
 });
 
 
@@ -74,6 +79,8 @@ class Model {
 
     this._initAllNodes(dataset);
 
+    this._checkRecompute();
+
     return this;
   };
 
@@ -124,6 +131,16 @@ class Model {
   };
 
   /**
+   * Will trigger an event if re-computation is required. Should be called
+   * whenever the model is modified. The data of the event is the cost as number.
+   */
+  _checkRecompute() {
+    if (this.needsRecompute) {
+      this._emitEvent(new ModelEvent(this, Enum_Event_Types.RequiresRecompute, this.recomputeCost));
+    }
+  };
+
+  /**
    * Obtain the Observable for this ModelNode that emits ModelEvent.
    * This Observable never drains. To save resources, call dispose() on
    * obtained Observers, when not longer needed.
@@ -141,6 +158,13 @@ class Model {
     return Object.keys(this.allNodes)
       .map(key => this.allNodes[key])
       .filter(n => n._parents.length === 0 && n.isAggregate);
+  };
+
+  /**
+   * @returns {boolean}
+   */
+  get needsRecompute() {
+    return this.recomputeCost > 0;
   };
 
   /**
@@ -168,9 +192,9 @@ class Model {
   async recompute() {
     const totalCost = this.recomputeCost;
     let costDone = 0;
-    this._emitEvent(new ModelEvent(this, Enum_Event_Types.Progress, 0))
+    this._emitEvent(new ModelEvent(this, Enum_Event_Types.Progress, 0));
 
-    Object.keys(this.allNodes).map(key => this.allNodes[key]).forEach(node => {
+    this.allNodesArray.forEach(node => {
       const costBefore = node.recomputeCost;
       const obs = node.observable.subscribe(evt => {
         if (evt.type === Enum_Event_Types.Progress) {
@@ -215,12 +239,37 @@ class Model {
 
   /**
    * 
+   * @param {ModelNode} node 
+   */
+  addNode(node) {
+    this.allNodes[node.name] = node;
+    this._checkRecompute();
+    return this;    
+  };
+
+  /**
+   * 
    * @param {ModelNode} fromChildNode 
    * @param {ModelNode} toParentNode 
    */
   addEdge(fromChildNode, toParentNode) {
+    if (fromChildNode === toParentNode) {
+      throw new Error('Parent and Child must not be the same node!');
+    }
+    if (toParentNode.hasChild(fromChildNode)) {
+      throw new Error('The given Parent already has the given Child!');
+    }
+    if (fromChildNode.hasChild(toParentNode)) {
+      throw new Error('There is already a connection from the given Child to the given Parent!');
+    }
+    if (toParentNode.isMetric) {
+      throw new Error('You must not add a child to a data-node (metric)!');
+    }
+
     fromChildNode.addParent(toParentNode);
     toParentNode.addChild(fromChildNode);
+
+    this._checkRecompute();
   };
 
   /**
@@ -229,8 +278,31 @@ class Model {
    * @param {ModelNode} toParentNode 
    */
   removeEdge(fromChildNode, toParentNode) {
+    if (!toParentNode.hasChild(fromChildNode)) {
+      throw new Error('The given Parent does not have the given Child!');
+    }
+
     fromChildNode.removeParent(toParentNode);
     toParentNode.removeChild(fromChildNode);
+
+    this._checkRecompute();
+  };
+
+  /**
+   * 
+   * @param {ModelNode} node 
+   * @returns {this}
+   */
+  removeNode(node) {
+    node._children.slice(0).forEach(child => {
+      this.removeEdge(child, node);
+    });
+    node._parents.slice(0).forEach(parent => {
+      this.removeEdge(node, parent);
+    });
+
+    delete this.allNodes[node.name];
+    return this;
   };
 
   /**

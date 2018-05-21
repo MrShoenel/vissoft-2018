@@ -32,7 +32,9 @@ class ModelNode {
   constructor(dataset, node) {
     this.dataset = dataset;
     this.length = dataset.length;
+    this.node = node;
     this.name = node.name;
+    this.id = sha1(this.name);
 
     /** @type {Array.<ModelNode>} */
     this._children = [];
@@ -128,6 +130,22 @@ class ModelNode {
   };
 
   /**
+   * @returns {boolean} true if this is an aggregation node without any
+   * children. In that case, no CDF will be available.
+   */
+  get isEmptyAggregation() {
+    return this.isAggregate && this._children.length === 0;
+  };
+
+  /**
+   * @param {ModelNode} node 
+   * @returns {boolean}
+   */
+  hasChild(node) {
+    return this._children.find(n => n === node) instanceof ModelNode;
+  };
+
+  /**
    * Returns the cost of recomputing this node, expressed as worst-case
    * amount of operations, which is O=mn², with m being the number of
    * columns (here: children) and n being the number of rows. If this
@@ -199,13 +217,13 @@ class ModelNode {
           data: c.getComputedData(Enum_Computation_Types.CDF)[0].data
         };
       });
-    const childData_CCDF = this._children.map(
-      c => {
-        return /** @type {Column} */ {
-          colName: c.name,
-          data: c.getComputedData(Enum_Computation_Types.CCDF)[0].data
-        };
-      });
+    // const childData_CCDF = this._children.map(
+    //   c => {
+    //     return /** @type {Column} */ {
+    //       colName: c.name,
+    //       data: c.getComputedData(Enum_Computation_Types.CCDF)[0].data
+    //     };
+    //   });
 
     // In this method, we parallelize over the rows. Every worker will do
     // a computation for one chunk of CDF and one chunk of CCDF.
@@ -215,7 +233,7 @@ class ModelNode {
     const parallel = new Parallel(ranges.map(range => {
       return {
         childData_CDF,
-        childData_CCDF,
+        // childData_CCDF,
         range
       }
     }), {
@@ -227,10 +245,10 @@ class ModelNode {
     const raw = await parallel.map(rangeObj => {
       const cdfChunk = computeCDF(
         rangeObj.childData_CDF, rangeObj.range.start, rangeObj.range.length, false);
-      const ccdfChunk = computeCDF(
-        rangeObj.childData_CCDF, rangeObj.range.start, rangeObj.range.length, true);
+      // const ccdfChunk = computeCDF(
+      //   rangeObj.childData_CCDF, rangeObj.range.start, rangeObj.range.length, true);
 
-      return { cdfChunk, ccdfChunk };
+      return { cdfChunk, /*ccdfChunk*/ };
     });
 
 
@@ -238,8 +256,8 @@ class ModelNode {
     this._states[this.state] = [
       ComputedData.fromChunks(
         Enum_Computation_Types.CDF, ...raw.map(r => r.cdfChunk)),
-      ComputedData.fromChunks(
-        Enum_Computation_Types.CCDF, ...raw.map(r => r.ccdfChunk))
+      // ComputedData.fromChunks(
+      //   Enum_Computation_Types.CCDF, ...raw.map(r => r.ccdfChunk))
     ];
 
     return this;

@@ -15,6 +15,16 @@
  * @property {string} name
  * @property {boolean} useColumn
  * @property {Array.<CSVColumn|JsonModelNode>} sources
+ * @property {number} [x] an optional x-coordinate
+ * @property {number} [y] an optional y-coordinate
+ */
+
+/**
+ * @typedef JsonModelLayout
+ * @type {Object}
+ * @property {number} translateX
+ * @property {number} translateY
+ * @property {number} scale
  */
 
 /**
@@ -22,6 +32,7 @@
  * @type {Object}
  * @property {{ generateColName: string, from: Array.<string>}} entityId
  * @property {Array.<JsonModelNode>} model
+ * @property {JsonModelLayout} modelLayout
  */
 
 
@@ -74,4 +85,11 @@
  * @template T
  * @property {T} from
  * @property {T} to
+ */
+
+/**
+ * @typedef Link
+ * @type {Object}
+ * @property {number} source
+ * @property {number} target
  */

@@ -142,12 +142,7 @@ function changeColormap(cmap) {
   dc.redrawAll();
 }
 
-function plots_init(evt) {
-  // The following instructions should be on a constructor
-  __data = evt.dataset.data;
-  __crossfilter = evt.dataset.crossfilter;
-  __model = evt.model;
-
+function plots_init() {
   sel_colormap = document.getElementById("sel_colormap");
   for (let cmap in colormaps) {
     let opt = document.createElement("option");
@@ -159,6 +154,13 @@ function plots_init(evt) {
   sel_colormap.value = defaultCmap;
   cmapDomain = [0, 1];
   cmapScale = d3v3.scale.quantize().domain(cmapDomain).range(colormaps[sel_colormap.value]);
+}
+
+function plots_data(evt) {
+  // The following instructions should be on a constructor
+  __data = evt.data.dataset.data;
+  __crossfilter = evt.data.dataset.crossfilter;
+  __model = evt.data.model;
 
   // This index will help later when adding the other charts
   for (let row of __data) {
@@ -166,7 +168,7 @@ function plots_init(evt) {
   }
 }
 
-function tsne(evt) {
+function tsne() {
   // Initialize the columns that will hold the t-SNE results
   for (let row of __data) {    
     row["tsne_x"] = 0;    
@@ -207,6 +209,7 @@ function tsne(evt) {
 
     w.postMessage(__data_score);
 
+    const progress = document.querySelector("progress#tsne-progress");
     const iter = document.getElementById("tsne-iter");
     const fin = document.getElementById("tsne-fin");
 
@@ -218,8 +221,9 @@ function tsne(evt) {
 
       chart("#tsne", "tsne_x", "tsne_y");
 
+      progress.value = event.data.progress;
       iter.innerHTML = "Iterations: " + event.data.iter;
-      fin.innerHTML = "Finished: " + ["Yes", "No"][event.data.finished ? 0 : 1]
+      fin.innerHTML = "Finished: " + ["Yes", "No"][event.data.finished ? 0 : 1];
     };
   } else {
     console.log('Sorry! No Web Worker support..');
@@ -227,14 +231,34 @@ function tsne(evt) {
 }
 
 
-function charts(evt) {
-  let colorSelected = false;  
+
+function charts(gridBoxGraph) {
+  const parent = document.getElementById("charts-col");
+  // const $body = $('foreignObject#node-fo-' + n.id + ' body')
+  //   .append($('<div/>').attr('id', `_chart-${n.id}`));
+  // const parent = $body.find(`div#_chart-${n.id}`)[0];
+
+  gridBoxGraph.observable.subscribe(evt => {
+    if (evt.type === 'nodeSelected') {
+      const $plotDiv = $(`div[data-node-id=${evt.data.id}]`).prev('div.chart-header'), $parent = $plotDiv.parent();
+
+      if ($plotDiv.length === 0) {
+        return; // Happens if there is no plot for the node..
+      }
+
+      $parent.scrollTop(0);
+      $plotDiv.parent().scrollTop(
+        $plotDiv.position().top - $plotDiv.parent().position().top);
+    }
+  });
+
+  let colorSelected = false;
   // Sort keys in descending order by depth
   const nodeKeys = Object.keys(__model.allNodes).sort((a, b) => __model.allNodes[b].depth - __model.allNodes[a].depth);
   // Iterate through the nodes in the order computed above
   for (let nodeKey of nodeKeys) {
     const n = __model.allNodes[nodeKey];    
-    if (n.hasState(n.state)) {
+    if (n.hasState(n.state) && !n.isEmptyAggregation) {
       const id = n.name.replace(/\s/g, '');
       const cdf = n.getComputedData()[0].data;
       
@@ -247,10 +271,13 @@ function charts(evt) {
         __index[item.id][yLabel] = item.val;
       }
 
-      const parent = document.getElementById("charts-col");
-
       const h = document.createElement("div");
       h.setAttribute("class", "chart-header");
+      // $(parent).on('click dblclick hover mousedown mouseenter mouseleave mousemove mouseout mouseover mouseup', e => {
+      //   e.stopPropagation();
+      //   e.preventDefault();
+      //   return false;
+      // });
       parent.appendChild(h);
 
       const title = document.createElement("span");
@@ -297,6 +324,7 @@ function charts(evt) {
 
       const div = document.createElement("div");
       div.id = id.replace(/\s/g, '');
+      $(div).attr('data-node-id', n.id);
       parent.appendChild(div);
 
       chart("#" + id, xLabel, yLabel, 150, true);

@@ -23,6 +23,15 @@ class GridboxHeader {
     this.btnOpen = document.querySelector('button#btn-open');
     this.btnOpenDefault = document.querySelector('button#btn-open-default');
 
+    this.btnOpen.addEventListener('click', async evt => {
+      evt.stopPropagation();
+      evt.preventDefault();
+
+      this.btnOpen.setAttribute('disabled', 'disabled');
+      await this.loadFromLocalFiles(this.selectedData, this.selectedModel);
+      this.btnOpen.removeAttribute('disabled');
+    });
+
     this.btnOpenDefault.addEventListener('click', async evt => {
       evt.preventDefault();
       evt.stopPropagation();
@@ -72,7 +81,7 @@ class GridboxHeader {
   };
 
   async loadDefaults() {
-    const defaultData = '/data/docs_16_comma_5000.csv',
+    const defaultData = '/data/default.csv',
       defaultModel = '/data/default-model.json';
     
     await this.load(defaultData, defaultModel);
@@ -82,14 +91,69 @@ class GridboxHeader {
   };
 
   async load(pathData, pathModel) {
-    this.dataset = await Dataset.fromDataAndQm(pathData, pathModel);
+    const ds = await Dataset.fromDataAndQm(pathData, pathModel);
+    ds.dataSource = pathData;
+    ds.modelSource = pathModel;
+    this._loadDataset(ds);
+  };
+
+  /**
+   * @param {File} dataFile
+   * @param {File} modelFile
+   */
+  loadFromLocalFiles(dataFile, modelFile) {
+    return new Promise((resolve, reject) => {
+      /** @type {string} */
+      let csv_data = null;
+      /** @type {string} */
+      let qm_data = null;
+
+      const fr_data = new FileReader(),
+        fr_model = new FileReader(),
+        checkDone = () => {
+          if (typeof csv_data === 'string' && typeof qm_data === 'string') {
+            const ds = Dataset.fromDataStringAndQmJson(csv_data, qm_data);
+            ds.dataSource = dataFile.name;
+            ds.modelSource = modelFile.name;
+
+            this._loadDataset(ds);
+            resolve();
+          }
+        };
+
+      fr_data.onload = evt => {
+        csv_data = fr_data.result;
+        checkDone();
+      };
+      fr_model.onload = evt => {
+        qm_data = fr_model.result;
+        checkDone();
+      };
+
+      fr_data.onerror = reject;
+      fr_model.onerror = reject;
+
+      fr_data.readAsText(dataFile);
+      fr_model.readAsText(modelFile);
+    });
+  };
+
+  /**
+   * @param {Dataset} dataset 
+   */
+  _loadDataset(dataset) {
+    this.dataset = dataset;
     this.model = new Model(this.dataset);
     this._emitEvent(new LoadEvent(this.dataset, this.model));
+
+    if ($('input#anon-data').is(':checked')) {
+      this.dataset.anonymize();
+    }
 
     this.gbStatus.logger(
       `Model recomputation cost is: ${this.model.recomputeCost}`);
     this.gbStatus.logger(
-      `Loaded data from '${pathData}' and model from '${pathModel}'.`);
+      `Loaded data from '${dataset.dataSource}' and model from '${dataset.modelSource}'.`);
   };
 
   /**

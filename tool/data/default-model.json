@@ -1,98 +1,175 @@
 {
-  "//": "This file contains the default schema to wire up the data from the file 'default.csv' (in this same directory). This file defines which columes should be used and how the aggregation works.",
-
-  "//": "Columns that make up the entities' ID. For each row, this ID will be composed by concatenating these columns to a string using a hyphen as glue. The generated column will have the name as specified by 'generateColName'.",
-  "entityId": {
-    "generateColName": "entity_id",
-    "from": ["#", "name"]
-  },
-
-  "//": "The following properties are the actual metrics we are using. Below that, we have the first level of aggregation and then we go to Quality on the top-level in this examplary model. The field 'useColumn' should be set to true iff the name is equal to a name of a column in the data and the node should use the data from that column.",
-  "model": [{
-    "name": "N_SentenceSize",
-    "useColumn": true,
-    "sources": []
-  }, {
-    "name": "N_XMLSize",
-    "useColumn": true,
-    "sources": []
-  }, {
-    "name": "R_Stability",
-    "useColumn": true,
-    "sources": []
-  }, {
-    "name": "N_InEdgeCount",
-    "useColumn": true,
-    "sources": []
-  }, {
-    "name": "N_OutEdgeCount",
-    "useColumn": true,
-    "sources": []
-  }, {
-    "name": "R_XMLSimilarity",
-    "useColumn": true,
-    "sources": []
-  }, {
-    "name": "R_XMLUniqueness",
-    "useColumn": true,
-    "sources": []
-  }, {
-    "name": "N_PointlessAbstraction",
-    "useColumn": true,
-    "sources": []
-  }, {
-    "name": "R_TextSimilarity",
-    "useColumn": true,
-    "sources": []
-  }, {
-    "name": "N_TextSize",
-    "useColumn": true,
-    "sources": []
-  }, {
-    "name": "N_SubSectionWidth",
-    "useColumn": true,
-    "sources": []
-  }, {
-    "name": "N_SubSectionDepth",
-    "useColumn": true,
-    "sources": []
-  }, {
-    "name": "N_BrokenRefs",
-    "useColumn": true,
-    "sources": []
-  }, {
-    "name": "N_BackRefs",
-    "useColumn": true,
-    "sources": []
-  }, {
-    "name": "N_TextSimilar",
-    "useColumn": true,
-    "sources": []
-  }, {
-    "name": "R_TextUniqueness",
-    "useColumn": true,
-    "sources": []
-  },
-
-
-  {
-    "name": "Cloning Issues",
-    "useColumn": false,
-    "sources": ["R_TextUniqueness", "R_XMLUniqueness", "R_TextSimilarity", "R_XMLSimilarity", "N_TextSimilar"]
-  }, {
-    "name": "Text Complexity",
-    "useColumn": false,
-    "sources": ["N_SentenceSize", "N_TextSize"]
-  }, {
-    "name": "Anti Patterns",
-    "useColumn": false,
-    "sources": ["R_Stability", "N_BrokenRefs", "N_BackRefs", "N_PointlessAbstraction"]
-  },
-
-
-  {
-    "name": "Quality",
-    "useColumn": false,
-    "sources": ["Cloning Issues", "Text Complexity", "Anti Patterns"]
-  }]
+	"//": "The following properties are the actual metrics we are using. Below that, we have the first level of aggregation and then we go to Quality on the top-level in this examplary model. The field 'useColumn' should be set to true iff the name is equal to a name of a column in the data and the node should use the data from that column.",
+	"entityId": {
+		"generateColName": "entity_id",
+		"from": [
+			"#",
+			"name"
+		]
+	},
+	"modelLayout": {
+		"scale": 0.8521460193658021,
+		"translateX": -50,
+		"translateY": -18
+	},
+	"model": [
+		{
+			"name": "N_SentenceSize",
+			"useColumn": true,
+			"sources": [],
+			"x": 496,
+			"y": 871
+		},
+		{
+			"name": "N_XMLSize",
+			"useColumn": true,
+			"sources": [],
+			"x": 200,
+			"y": 916
+		},
+		{
+			"name": "R_Stability",
+			"useColumn": true,
+			"sources": [],
+			"x": 447,
+			"y": 106
+		},
+		{
+			"name": "N_InEdgeCount",
+			"useColumn": true,
+			"sources": [],
+			"x": 288,
+			"y": 917
+		},
+		{
+			"name": "N_OutEdgeCount",
+			"useColumn": true,
+			"sources": [],
+			"x": 288,
+			"y": 973
+		},
+		{
+			"name": "R_XMLSimilarity",
+			"useColumn": true,
+			"sources": [],
+			"x": 337,
+			"y": 399
+		},
+		{
+			"name": "R_XMLUniqueness",
+			"useColumn": true,
+			"sources": [],
+			"x": 222,
+			"y": 440
+		},
+		{
+			"name": "N_PointlessAbstraction",
+			"useColumn": true,
+			"sources": [],
+			"x": 440,
+			"y": 213
+		},
+		{
+			"name": "R_TextSimilarity",
+			"useColumn": true,
+			"sources": [],
+			"x": 233,
+			"y": 652
+		},
+		{
+			"name": "N_TextSize",
+			"useColumn": true,
+			"sources": [],
+			"x": 605,
+			"y": 941
+		},
+		{
+			"name": "N_SubSectionWidth",
+			"useColumn": true,
+			"sources": [],
+			"x": 197,
+			"y": 857
+		},
+		{
+			"name": "N_SubSectionDepth",
+			"useColumn": true,
+			"sources": [],
+			"x": 201,
+			"y": 973
+		},
+		{
+			"name": "N_BrokenRefs",
+			"useColumn": true,
+			"sources": [],
+			"x": 509,
+			"y": 299
+		},
+		{
+			"name": "N_BackRefs",
+			"useColumn": true,
+			"sources": [],
+			"x": 528,
+			"y": 36
+		},
+		{
+			"name": "N_TextSimilar",
+			"useColumn": true,
+			"sources": [],
+			"x": 337,
+			"y": 686
+		},
+		{
+			"name": "R_TextUniqueness",
+			"useColumn": true,
+			"sources": [],
+			"x": 180,
+			"y": 540
+		},
+		{
+			"name": "Cloning Issues",
+			"useColumn": false,
+			"sources": [
+				"R_TextUniqueness",
+				"R_XMLUniqueness",
+				"R_TextSimilarity",
+				"R_XMLSimilarity",
+				"N_TextSimilar"
+			],
+			"x": 430,
+			"y": 537
+		},
+		{
+			"name": "Text Complexity",
+			"useColumn": false,
+			"sources": [
+				"N_SentenceSize",
+				"N_TextSize"
+			],
+			"x": 658,
+			"y": 807
+		},
+		{
+			"name": "Anti Patterns",
+			"useColumn": false,
+			"sources": [
+				"R_Stability",
+				"N_BrokenRefs",
+				"N_BackRefs",
+				"N_PointlessAbstraction"
+			],
+			"x": 651,
+			"y": 183
+		},
+		{
+			"name": "Quality",
+			"useColumn": false,
+			"sources": [
+				"Cloning Issues",
+				"Text Complexity",
+				"Anti Patterns"
+			],
+			"x": 878,
+			"y": 539
+		}
+	]
 }
