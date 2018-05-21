@@ -1,0 +1,104 @@
+{
+  "//": "This file contains the default schema to wire up the data from the file 'default.csv' (in this same directory). This file defines which columes should be used and how the aggregation works.",
+
+  "//": "Columns that make up the entities' ID. For each row, this ID will be composed by concatenating these columns to a string using a hyphen as glue. The generated column will have the name as specified by 'generateColName'.",
+  "entityId": {
+    "generateColName": "entity_id",
+    "from": ["#", "name"]
+  },
+
+  "//": "The following properties are the actual metrics we are using. Below that, we have the first level of aggregation and then we go to Quality on the top-level in this examplary model. The field 'useColumn' should be set to true iff the name is equal to a name of a column in the data and the node should use the data from that column.",
+  "model": [{
+    "name": "CYC_Classes",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "DAC",
+    "desc": "Data Abstraction Coupling",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "DIT",
+    "desc": "Depth of Inheritance Tree",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "ILCOM",
+    "desc": "Improvement of LCOM",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "LCOM",
+    "desc": "Lack of Cohesion in Methods",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "LD",
+    "desc": "Locality of Data",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "LEN",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "LOC",
+    "desc": "Lines of Code",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "MPC",
+    "desc": "Message Passing Coupling",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "LOD_Class",
+    "desc": "Lack of Documentation (Class Level)",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "NAM",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "NOC",
+    "desc": "Number of Children",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "NOM",
+    "desc": "Number of local Methods",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "RFC",
+    "desc": "Response For a Class",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "TCC",
+    "desc": "Tight Class Cohesion",
+    "useColumn": true,
+    "sources": []
+  }, {
+    "name": "WMC",
+    "desc": "Weighted Method Count",
+    "useColumn": true,
+    "sources": []
+  },{
+    "name": "CBO",
+    "desc": "Coupling between Objects",
+    "useColumn": true,
+    "sources": []
+  },
+  
+  
+  
+
+
+  {
+    "name": "Maintainability",
+    "useColumn": false,
+    "sources": ["CYC_Classes", "DAC", "DIT", "ILCOM", "LCOM", "LD", "LEN", "LOC", "MPC", "LOD_Class", "NAM", "NOC", "NOM", "RFC", "TCC", "WMC", "CBO"]
+  }]
+}

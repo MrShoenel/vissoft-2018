@@ -16,7 +16,7 @@ div#main-grid {
 div#graph-div {
   border: 1px solid black;
   height: 100%;
-  max-height: 100%;
+  max-height: 600px;
   background-color: #ccc;
 }
 
@@ -24,7 +24,7 @@ div#tsne-grid {
   background: transparent !important;
   display: grid;
   height: 100%;
-  max-height: 100%;
+  max-height: 600px;
   grid-template-rows: calc(50% - 5px) calc(50% - 5px);
   grid-row-gap: 10px;
 }
@@ -163,4 +163,14 @@ foreignObject > body > div h4 {
   padding: .5ex;
   background-color: #fff;
   word-wrap: break-word;
+}
+
+#ranking-content > tbody > tr {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                supported by Chrome and Opera */
 }

@@ -24198,6 +24198,54 @@ dc.scatterPlot = function (parent, chartGroup) {
         return _context;
     };
 
+    function plotPoint(d, i, context, data, legendHighlightDatum) {
+        var isFiltered = !_chart.filter() || _chart.filter().isFiltered([d.key[0], d.key[1]]);
+        // Calculate opacity for current data point
+        var cOpacity = 1;
+        if (!_existenceAccessor(d)) {
+            cOpacity = _emptyOpacity;
+        } else if (isFiltered) {
+            cOpacity = _nonemptyOpacity;
+        } else {
+            cOpacity = _chart.excludedOpacity();
+        }
+        // Calculate color for current data point
+        var cColor = null;
+        if (_emptyColor && !_existenceAccessor(d)) {
+            cColor = _emptyColor;
+        } else if (_chart.excludedColor() && !isFiltered) {
+            cColor = _chart.excludedColor();
+        } else {
+            cColor = _chart.getColor(d);
+        }
+        var cSize = canvasElementSize(d, isFiltered);
+
+        // Adjust params for data points if legend is highlighted
+        if (legendHighlightDatum) {
+            var isHighlighted = (cColor === legendHighlightDatum.color);
+            // Calculate opacity for current data point
+            var fadeOutOpacity = 0.1; // TODO: Make this programmatically setable
+            if (!isHighlighted) { // Fade out non-highlighted colors + highlighted colors outside filter
+                cOpacity = fadeOutOpacity;
+            }
+            if (isHighlighted) { // Set size for highlighted color data points
+                cSize = _highlightedSize / Math.sqrt(Math.PI);
+            }
+        }
+
+        // Draw point on canvas
+        context.save();
+        context.globalAlpha = cOpacity;
+        context.beginPath();
+        context.arc(_chart.x()(_chart.keyAccessor()(d)), _chart.y()(_chart.valueAccessor()(d)), cSize, 0, 2 * Math.PI, true);
+        context.fillStyle = cColor;
+        context.fill();
+        // context.lineWidth = 0.5; // Commented out code to add stroke around scatter points if desired
+        // context.strokeStyle = '#333';
+        // context.stroke();
+        context.restore();        
+    }
+
     // Plots data on canvas element. If argument provided, assumes legend is
     // currently being highlighted and modifies opacity/size of symbols accordingly
     // @param {Object} [legendHighlightDatum] - Datum provided to legendHighlight method
@@ -24206,53 +24254,19 @@ dc.scatterPlot = function (parent, chartGroup) {
         context.clearRect(0, 0, (context.canvas.width + 2) * 1, (context.canvas.height + 2) * 1);
         var data = _chart.data();
 
+        let drawLater = [];
+
         // Draw the data on canvas
-        data.forEach(function (d, i) {
-            var isFiltered = !_chart.filter() || _chart.filter().isFiltered([d.key[0], d.key[1]]);
-            // Calculate opacity for current data point
-            var cOpacity = 1;
+        data.forEach(function (d, i) {            
             if (!_existenceAccessor(d)) {
-                cOpacity = _emptyOpacity;
-            } else if (isFiltered) {
-                cOpacity = _nonemptyOpacity;
+                plotPoint(d, i, context, data, legendHighlightDatum);
             } else {
-                cOpacity = _chart.excludedOpacity();
+                drawLater.push([d, i]);
             }
-            // Calculate color for current data point
-            var cColor = null;
-            if (_emptyColor && !_existenceAccessor(d)) {
-                cColor = _emptyColor;
-            } else if (_chart.excludedColor() && !isFiltered) {
-                cColor = _chart.excludedColor();
-            } else {
-                cColor = _chart.getColor(d);
-            }
-            var cSize = canvasElementSize(d, isFiltered);
+        });
 
-            // Adjust params for data points if legend is highlighted
-            if (legendHighlightDatum) {
-                var isHighlighted = (cColor === legendHighlightDatum.color);
-                // Calculate opacity for current data point
-                var fadeOutOpacity = 0.1; // TODO: Make this programmatically setable
-                if (!isHighlighted) { // Fade out non-highlighted colors + highlighted colors outside filter
-                    cOpacity = fadeOutOpacity;
-                }
-                if (isHighlighted) { // Set size for highlighted color data points
-                    cSize = _highlightedSize / Math.sqrt(Math.PI);
-                }
-            }
-
-            // Draw point on canvas
-            context.save();
-            context.globalAlpha = cOpacity;
-            context.beginPath();
-            context.arc(_chart.x()(_chart.keyAccessor()(d)), _chart.y()(_chart.valueAccessor()(d)), cSize, 0, 2 * Math.PI, true);
-            context.fillStyle = cColor;
-            context.fill();
-            // context.lineWidth = 0.5; // Commented out code to add stroke around scatter points if desired
-            // context.strokeStyle = '#333';
-            // context.stroke();
-            context.restore();
+        drawLater.forEach(function (d) {            
+            plotPoint(d[0], d[1], context, data, legendHighlightDatum);
         });
     }
 

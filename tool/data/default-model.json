@@ -1,138 +1,129 @@
 {
-  "//": "This file contains the default schema to wire up the data from the file 'default.csv' (in this same directory). This file defines which columes should be used and how the aggregation works.",
-
-  "//": "Columns that make up the entities' ID. For each row, this ID will be composed by concatenating these columns to a string using a hyphen as glue. The generated column will have the name as specified by 'generateColName'.",
-  "entityId": {
-    "generateColName": "entity_id",
-    "from": ["#", "name"]
-  },
-
-  "//": "Additional, optional properties to layout the model as graph. These properties are stored if the model is exported.",
-  "modelLayout": {
-    "translateX": 0,
-    "translateY": 0,
-    "scale": 1
-  },
-
-  "//": "The following properties are the actual metrics we are using. Below that, we have the first level of aggregation and then we go to Quality on the top-level in this examplary model. The field 'useColumn' should be set to true iff the name is equal to a name of a column in the data and the node should use the data from that column.",
-
+	"//": "The following properties are the actual metrics we are using. Below that, we have the first level of aggregation and then we go to Quality on the top-level in this examplary model. The field 'useColumn' should be set to true iff the name is equal to a name of a column in the data and the node should use the data from that column.",
+	"entityId": {
+		"generateColName": "entity_id",
+		"from": [
+			"#",
+			"name"
+		]
+	},
 	"modelLayout": {
-		"scale": 1,
-		"translateX": 0,
-		"translateY": 0
+		"scale": 0.8521460193658021,
+		"translateX": -50,
+		"translateY": -18
 	},
 	"model": [
 		{
 			"name": "N_SentenceSize",
 			"useColumn": true,
 			"sources": [],
-			"x": 258.23190092913194,
-			"y": 972.5264431297833
+			"x": 496,
+			"y": 871
 		},
 		{
 			"name": "N_XMLSize",
 			"useColumn": true,
 			"sources": [],
-			"x": 0,
-			"y": 703.6159387916797
+			"x": 200,
+			"y": 916
 		},
 		{
 			"name": "R_Stability",
 			"useColumn": true,
 			"sources": [],
-			"x": 761.5,
-			"y": 365.7801025277082
+			"x": 447,
+			"y": 106
 		},
 		{
 			"name": "N_InEdgeCount",
 			"useColumn": true,
 			"sources": [],
-			"x": 14.19687043488291,
-			"y": 915.619128274659
+			"x": 288,
+			"y": 917
 		},
 		{
 			"name": "N_OutEdgeCount",
 			"useColumn": true,
 			"sources": [],
-			"x": 761.5,
-			"y": 991.7329687888183
+			"x": 288,
+			"y": 973
 		},
 		{
 			"name": "R_XMLSimilarity",
 			"useColumn": true,
 			"sources": [],
-			"x": 470.8065989213291,
-			"y": 277.2491828800097
+			"x": 337,
+			"y": 399
 		},
 		{
 			"name": "R_XMLUniqueness",
 			"useColumn": true,
 			"sources": [],
-			"x": 431.73781376209104,
-			"y": 100.16233284586556
+			"x": 222,
+			"y": 440
 		},
 		{
 			"name": "N_PointlessAbstraction",
 			"useColumn": true,
 			"sources": [],
-			"x": 761.5,
-			"y": 522.3059550861952
+			"x": 440,
+			"y": 213
 		},
 		{
 			"name": "R_TextSimilarity",
 			"useColumn": true,
 			"sources": [],
-			"x": 233.08825341445777,
-			"y": 71.98653084678611
+			"x": 233,
+			"y": 652
 		},
 		{
 			"name": "N_TextSize",
 			"useColumn": true,
 			"sources": [],
-			"x": 464.71617104681644,
-			"y": 995.4935137590883
+			"x": 605,
+			"y": 941
 		},
 		{
 			"name": "N_SubSectionWidth",
 			"useColumn": true,
 			"sources": [],
-			"x": 761.5,
-			"y": 112.37203957303117
+			"x": 197,
+			"y": 857
 		},
 		{
 			"name": "N_SubSectionDepth",
 			"useColumn": true,
 			"sources": [],
-			"x": 0,
-			"y": 491.4373607700532
+			"x": 201,
+			"y": 973
 		},
 		{
 			"name": "N_BrokenRefs",
 			"useColumn": true,
 			"sources": [],
-			"x": 761.5,
-			"y": 695.146697515585
+			"x": 509,
+			"y": 299
 		},
 		{
 			"name": "N_BackRefs",
 			"useColumn": true,
 			"sources": [],
-			"x": 607.619914669169,
-			"y": 728.1248606774648
+			"x": 528,
+			"y": 36
 		},
 		{
 			"name": "N_TextSimilar",
 			"useColumn": true,
 			"sources": [],
-			"x": 191.48352154665815,
-			"y": 419.75681261194177
+			"x": 337,
+			"y": 686
 		},
 		{
 			"name": "R_TextUniqueness",
 			"useColumn": true,
 			"sources": [],
-			"x": 71.5296664020256,
-			"y": 234.2726040938509
+			"x": 180,
+			"y": 540
 		},
 		{
 			"name": "Cloning Issues",
@@ -144,8 +135,8 @@
 				"R_XMLSimilarity",
 				"N_TextSimilar"
 			],
-			"x": 282.1832268595305,
-			"y": 266.71133051847886
+			"x": 430,
+			"y": 537
 		},
 		{
 			"name": "Text Complexity",
@@ -154,8 +145,8 @@
 				"N_SentenceSize",
 				"N_TextSize"
 			],
-			"x": 364.4549421031711,
-			"y": 823.2964404291622
+			"x": 658,
+			"y": 807
 		},
 		{
 			"name": "Anti Patterns",
@@ -166,8 +157,8 @@
 				"N_BackRefs",
 				"N_PointlessAbstraction"
 			],
-			"x": 606.8753701726031,
-			"y": 526.523238948232
+			"x": 651,
+			"y": 183
 		},
 		{
 			"name": "Quality",
@@ -177,8 +168,8 @@
 				"Text Complexity",
 				"Anti Patterns"
 			],
-			"x": 372.39532972778727,
-			"y": 574.7122867771438
+			"x": 878,
+			"y": 539
 		}
 	]
 }

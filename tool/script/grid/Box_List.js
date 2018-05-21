@@ -17,6 +17,8 @@ class GridboxList {
     /** @type {Dataset} */
     this.dataset = null;
 
+    this.dim = null;
+
     let bound = false;
 
     this.$table = $('table#ranking-content').tablesorter();
@@ -25,11 +27,14 @@ class GridboxList {
     /** @param {Array.<ModelNode>} nodes */
     const addOptions = nodes => {
       this.$select.empty();
-      nodes.forEach(node => {
+      nodes.sort((n1, n2) => n2.depth - n1.depth).forEach(node => {
         const $opt = $('<option/>').text(node.name).attr('option', node.name);
         if (node.isEmptyAggregation) {
           $opt.attr('disabled', 'disabled');
           $opt.text($opt.text() + ' (empty aggregate)');
+        } else if (node.isMetric && node._parents.length === 0) {
+          $opt.attr('disabled', 'disabled');
+          $opt.text($opt.text() + ' (not connected)');
         }
         this.$select.append($opt);
       });
@@ -43,6 +48,7 @@ class GridboxList {
 
     dataObservable.subscribe(evt => {
       this.dataset = evt.dataset;
+      this.dim = this.dataset.crossfilter.dimension(d => d[this.dataset.entityIdColumn]);
       this.model = evt.model;
       this.model.observable.subscribe(evt => {
         if (evt.type === Enum_Event_Types.RequiresRecompute) {
@@ -70,6 +76,17 @@ class GridboxList {
     return this.model.allNodesArray.find(node => node.name === selected);
   };
 
+  // @SEBASTIAN: Please check here if you need to add the param comments, I'm not sure how to use that :)
+  _rowOnClick(evt) {
+    if (evt.shiftKey) {
+      this.dim.filterAll();
+    } else {
+      this.dim.filter(evt.currentTarget.id);
+    }
+    // ugly global for now; sorry! :)
+    redrawAll();
+  }
+
   /**
    * 
    * @param {ModelNode} node 
@@ -88,10 +105,13 @@ class GridboxList {
       const $tr = $('<tr/>'), itemId = item[this.dataset.entityIdColumn],
         itemCdfVal = cdf.data.find(d => d.id === itemId).val;
 
-      $tr.append($('<td/>').text(itemId));
+      $tr.append($('<td/>').text(itemId)).attr('id', itemId);
       $tr.append($('<td/>').text(itemCdfVal.toFixed(4)));
 
       $tr.appendTo($tbody);
+
+      // Using the method directly does not work, because "this" is changed
+      $tr.click(evt => this._rowOnClick(evt));
     });
 
     this.$table.trigger('update');
