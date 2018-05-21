@@ -17,113 +17,113 @@
 			"name": "N_SentenceSize",
 			"useColumn": true,
 			"sources": [],
-			"x": 496,
-			"y": 871
+			"x": 458,
+			"y": 831
 		},
 		{
 			"name": "N_XMLSize",
 			"useColumn": true,
 			"sources": [],
-			"x": 200,
-			"y": 916
+			"x": 152,
+			"y": 1004
 		},
 		{
 			"name": "R_Stability",
 			"useColumn": true,
 			"sources": [],
-			"x": 447,
-			"y": 106
+			"x": 535,
+			"y": 0
 		},
 		{
 			"name": "N_InEdgeCount",
 			"useColumn": true,
 			"sources": [],
-			"x": 288,
-			"y": 917
+			"x": 106,
+			"y": 1004
 		},
 		{
 			"name": "N_OutEdgeCount",
 			"useColumn": true,
 			"sources": [],
-			"x": 288,
-			"y": 973
+			"x": 238,
+			"y": 1004
 		},
 		{
 			"name": "R_XMLSimilarity",
 			"useColumn": true,
 			"sources": [],
-			"x": 337,
-			"y": 399
+			"x": 133,
+			"y": 265
 		},
 		{
 			"name": "R_XMLUniqueness",
 			"useColumn": true,
 			"sources": [],
-			"x": 222,
-			"y": 440
+			"x": 8,
+			"y": 406
 		},
 		{
 			"name": "N_PointlessAbstraction",
 			"useColumn": true,
 			"sources": [],
-			"x": 440,
-			"y": 213
+			"x": 368,
+			"y": 47
 		},
 		{
 			"name": "R_TextSimilarity",
 			"useColumn": true,
 			"sources": [],
-			"x": 233,
-			"y": 652
+			"x": 11,
+			"y": 716
 		},
 		{
 			"name": "N_TextSize",
 			"useColumn": true,
 			"sources": [],
-			"x": 605,
-			"y": 941
+			"x": 621,
+			"y": 959
 		},
 		{
 			"name": "N_SubSectionWidth",
 			"useColumn": true,
 			"sources": [],
-			"x": 197,
-			"y": 857
+			"x": 0,
+			"y": 1004
 		},
 		{
 			"name": "N_SubSectionDepth",
 			"useColumn": true,
 			"sources": [],
-			"x": 201,
-			"y": 973
+			"x": 21,
+			"y": 1004
 		},
 		{
 			"name": "N_BrokenRefs",
 			"useColumn": true,
 			"sources": [],
-			"x": 509,
-			"y": 299
+			"x": 443,
+			"y": 207
 		},
 		{
 			"name": "N_BackRefs",
 			"useColumn": true,
 			"sources": [],
-			"x": 528,
-			"y": 36
+			"x": 716,
+			"y": 0
 		},
 		{
 			"name": "N_TextSimilar",
 			"useColumn": true,
 			"sources": [],
-			"x": 337,
-			"y": 686
+			"x": 221,
+			"y": 690
 		},
 		{
 			"name": "R_TextUniqueness",
 			"useColumn": true,
 			"sources": [],
-			"x": 180,
-			"y": 540
+			"x": 18,
+			"y": 564
 		},
 		{
 			"name": "Cloning Issues",
@@ -135,8 +135,8 @@
 				"R_XMLSimilarity",
 				"N_TextSimilar"
 			],
-			"x": 430,
-			"y": 537
+			"x": 318,
+			"y": 485
 		},
 		{
 			"name": "Text Complexity",
@@ -145,8 +145,8 @@
 				"N_SentenceSize",
 				"N_TextSize"
 			],
-			"x": 658,
-			"y": 807
+			"x": 652,
+			"y": 751
 		},
 		{
 			"name": "Anti Patterns",
@@ -168,8 +168,8 @@
 				"Text Complexity",
 				"Anti Patterns"
 			],
-			"x": 878,
-			"y": 539
+			"x": 853,
+			"y": 489
 		}
 	]
 }

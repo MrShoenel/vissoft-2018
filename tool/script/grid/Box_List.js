@@ -21,6 +21,7 @@ class GridboxList {
 
     let bound = false;
 
+    this.$count = $('span#ranking-num-sel');
     this.$table = $('table#ranking-content').tablesorter();
     this.$select = $('select#ranking-by-node').empty();
 
@@ -77,15 +78,17 @@ class GridboxList {
   };
 
   // @SEBASTIAN: Please check here if you need to add the param comments, I'm not sure how to use that :)
-  _rowOnClick(evt) {
+  _rowOnClick(evt, itemId) {
     if (evt.shiftKey) {
       this.dim.filterAll();
     } else {
-      this.dim.filter(evt.currentTarget.id);
+      this.dim.filter(itemId);
     }
     // ugly global for now; sorry! :)
     redrawAll();
-  }
+
+    // this._renderList(this.selectedNode);
+  };
 
   /**
    * 
@@ -99,22 +102,27 @@ class GridboxList {
     /** @type {CSVNumericData|d3.DSVParsedArray.<d3.DSVRowString>} */
     const items = this.dataset.crossfilter.allFiltered();
 
+    this.$count.text(items.length);
+
     // Now, for each element, attach a row
     $tbody.empty();
-    items.forEach(item => {
+    items.forEach((item, idx) => {
       const $tr = $('<tr/>'), itemId = item[this.dataset.entityIdColumn],
         itemCdfVal = cdf.data.find(d => d.id === itemId).val;
 
-      $tr.append($('<td/>').text(itemId)).attr('id', itemId);
+      $tr.append($('<td/>').text(idx + 1));
+      $tr.append($('<td/>').text(itemId));
       $tr.append($('<td/>').text(itemCdfVal.toFixed(4)));
 
       $tr.appendTo($tbody);
 
       // Using the method directly does not work, because "this" is changed
-      $tr.click(evt => this._rowOnClick(evt));
+      $tr.click(evt => this._rowOnClick(evt, itemId));
     });
 
     this.$table.trigger('update');
+    // Sort on 'Value' ascending
+    this.$table.trigger("sorton", [[[2,0]]]);
   };
 
   /**

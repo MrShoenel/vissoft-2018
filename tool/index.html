@@ -90,14 +90,19 @@
         </div>
         <div id="ranking">
           <div id="ranking-title">
-            Selection
-            <span id="ranking-num-sel"># of selected elements: 0</span>
+            # of selected elements: <span id="ranking-num-sel">0</span>
             <label for="ranking-by-node">Use node: </label>
             <select id="ranking-by-node"></select>
+          </div>
+          <div style="padding: 10px;">
+            <small>
+              <i>Click to select an instance; shift-click to de-select instance</i>
+            </small>
           </div>
           <table id="ranking-content">
             <thead>
               <tr>
+                <th>#</th>
                 <th>Entity-ID</th>
                 <th>Value</th>
               </tr>
@@ -114,23 +119,51 @@
       <button type="button" id="btn-recomp-model">Re-compute Model</button>
       <span id="show-model-ops">Show/hide Model Operations ▼▲</span>
       <div id="model-ops-wrapper" style="display: none;">
-        <label for="aggregate-nodes">Remove Node:</label>
-        <select id="aggregate-nodes"></select>
-        <button id="remove-node">Remove</button>
-        <br />
-        <label for="newnode-name">Create Node:</label>
-        <input type="text" id="newnode-name" placeholder="name" />
-        <button id="create-node">Create</button>
-        <br />
-        <label for="edges">Remove Edge:</label>
-        <select id="edges"></select>
-        <button id="remove-edge">Remove</button>
-        <br />
-        <label>Create Edge from:</label>
-        <select id="edge-from"></select>
-        to:
-        <select id="edge-to"></select>
-        <button id="create-edge">Create</button>
+        <table>
+          <tbody>
+            <tr>
+              <td>
+                <label for="aggregate-nodes">Remove Node:</label>
+              </td>
+              <td>
+                <select id="aggregate-nodes"></select>
+                <button id="remove-node">Remove</button>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <label for="newnode-name">Create Node:</label>
+              </td>
+              <td>
+                <input type="text" id="newnode-name" placeholder="name" />
+                <button id="create-node">Create</button>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <label for="edges">Remove Edge:</label>
+              </td>
+              <td>
+                <select id="edges"></select>
+                <button id="remove-edge">Remove</button>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <label>Create Edge from:</label>
+              </td>
+              <td>
+                <select id="edge-from"></select>
+                to:
+                <select id="edge-to"></select>
+                <button id="create-edge">Create</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </p>
 
