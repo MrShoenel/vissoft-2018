@@ -49,9 +49,6 @@ class GridboxStatus {
     if (!(value instanceof Model)) {
       throw new Error('A Model-instance is required.');
     }
-    if (this._model instanceof Model) {
-      throw new Error('You must not re-set the model.');
-    }
 
     this._model = value;
 

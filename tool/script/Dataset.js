@@ -130,6 +130,18 @@ class Dataset {
   };
 
   /**
+   * Splices the internal data to a length of zero, thus effectively clearing
+   * all data and releasing the memory. This method should be called for proper
+   * destruction of a @see {Dataset}.
+   * 
+   * @returns {this} for chaining
+   */
+  clear() {
+    this.data.splice(0, this.data.length);
+    return this;
+  };
+
+  /**
    * Load a Dataset from stringified data.
    * 
    * @param {string} csvString the CSV-data as string

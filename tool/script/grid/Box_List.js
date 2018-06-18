@@ -45,25 +45,30 @@ class GridboxList {
       }
     };
 
-    let bound = false;
 
+    /** @type {Rx.IDisposable} */
+    let subscription = null;
+
+    // Will trigger whenever there is a new Dataset loaded.
     dataObservable.subscribe(evt => {
+      if (subscription !== null) {
+        subscription.dispose();
+        subscription = null;
+      }
+      
       this.dataset = evt.dataset;
       this.dim = this.dataset.crossfilter.dimension(d => d[this.dataset.entityIdColumn]);
       this.model = evt.model;
-      this.model.observable.subscribe(evt => {
+      subscription = this.model.observable.subscribe(evt => {
         if (evt.type === Enum_Event_Types.RequiresRecompute) {
           addOptions(this.model.allNodesArray);
         }
       });
-
-      if (!bound) {
-        evt.dataset.crossfilter.onChange(this._changeCallback.bind(this));
-        this.$select.on('change', _ => {
-          this._renderList(this.selectedNode);
-        });
-        bound = true;
-      }
+      
+      evt.dataset.crossfilter.onChange(this._changeCallback.bind(this));
+      this.$select.on('change', _ => {
+        this._renderList(this.selectedNode);
+      });
     
       addOptions(this.model.allNodesArray);
     });

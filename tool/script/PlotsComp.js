@@ -1,4 +1,7 @@
 import { dc_canvas } from './DcCanvasBundle.js';
+import { Dataset } from './Dataset.js';
+import { Model } from './Model.js';
+import { GridboxGraph } from './grid/Box_Graph.js';
 
 const dc = dc_canvas.dc;
 const crossfilter = dc_canvas.crossfilter;
@@ -9,8 +12,9 @@ const plots = {},
       __index = {};
 
 let __data,
-    __crossfilter,
-    __model;
+    __crossfilter;
+/** @type {Model} */
+let __model;
 
 const colormaps = {
   'puOr11': ['#7f3b08', '#b35806', '#e08214', '#fdb863', '#fee0b6', '#f7f7f7', '#d8daeb', '#b2abd2', '#8073ac', '#542788', '#2d004b'],
@@ -61,15 +65,15 @@ function chart(parent, x, y, height=-1, prob=false) {
   // If chart does not exist yet, create it
   if (!(parent in plots)) {
     plots[parent] = dc.scatterPlot(parent)        
-        .useCanvas(true)
-        .highlightedSize(4)
-        .symbolSize(5)
-        .excludedSize(3)
-        .excludedOpacity(0.5)
-        .excludedColor('#ddd')
-        .emptySize(3)
-        .emptyOpacity(0.5)
-        .emptyColor('#ddd');
+      .useCanvas(true)
+      .highlightedSize(4)
+      .symbolSize(5)
+      .excludedSize(3)
+      .excludedOpacity(0.5)
+      .excludedColor('#ddd')
+      .emptySize(3)
+      .emptyOpacity(0.5)
+      .emptyColor('#ddd');
   }
 
   const chart = plots[parent];
@@ -157,11 +161,18 @@ function plots_init() {
   cmapScale = d3v3.scale.quantize().domain(cmapDomain).range(colormaps[sel_colormap.value]);
 };
 
-function plots_data(evt) {
+/**
+ * @param {Dataset} dataset
+ * @param {Model} model
+ */
+function plots_data(dataset, model) {
   // The following instructions should be on a constructor
-  __data = evt.data.dataset.data;
-  __crossfilter = evt.data.dataset.crossfilter;
-  __model = evt.data.model;
+  // __data = evt.data.dataset.data;
+  __data = dataset.data;
+  // __crossfilter = evt.data.dataset.crossfilter;
+  __crossfilter = dataset.crossfilter;
+  // __model = evt.data.model;
+  __model = model;
 
   // This index will help later when adding the other charts
   for (let row of __data) {
@@ -169,17 +180,33 @@ function plots_data(evt) {
   }
 };
 
+function clearCharts() {
+  $('#charts-col').empty();
+  const keys = Object.keys(plots).filter(k => k !== '#tsne');
+  keys.forEach(k => delete plots[k]);
+};
+
+function clearTSNE() {
+  delete plots["#tsne"];
+};
+
+/** @type {Worker} */
+let w = null;
+
 function tsne() {
   // Initialize the columns that will hold the t-SNE results
   for (let row of __data) {    
     row["tsne_x"] = 0;    
     row["tsne_y"] = 0;
   }
-
+  
   chart("#tsne", "tsne_x", "tsne_y");
   
   if (typeof(Worker) !== "undefined") {
-    let w = new Worker("./script/tsne-worker.js");
+    if (w instanceof Worker) {
+      w.terminate();
+    }
+    w = new Worker("./script/tsne-worker.js");
 
     // Data pre-processing
     
@@ -211,6 +238,10 @@ function tsne() {
     const fin = document.getElementById("tsne-fin");
 
     w.onmessage = function(event) {
+      if (__data.length < event.data.output.length) {
+        return;
+      }
+
       for (let i = 0; i < event.data.output.length; ++i) {
         __data[i]["tsne_x"] = event.data.output[i][0];
         __data[i]["tsne_y"] = event.data.output[i][1];
@@ -229,6 +260,9 @@ function tsne() {
 
 
 
+/**
+ * @param {GridboxGraph} gridBoxGraph 
+ */
 function charts(gridBoxGraph) {
   const parent = document.getElementById("charts-col");
   // const $body = $('foreignObject#node-fo-' + n.id + ' body')
@@ -251,10 +285,9 @@ function charts(gridBoxGraph) {
 
   let colorSelected = false;
   // Sort keys in descending order by depth
-  const nodeKeys = Object.keys(__model.allNodes).sort((a, b) => __model.allNodes[b].depth - __model.allNodes[a].depth);
+  const nodes = __model.allNodesArray.sort((a, b) => b.depth - a.depth);
   // Iterate through the nodes in the order computed above
-  for (let nodeKey of nodeKeys) {
-    const n = __model.allNodes[nodeKey];    
+  for (let n of nodes) {
     if (n.hasState(n.state) && !n.isEmptyAggregation) {
       const id = n.name.replace(/\s/g, '');
       const cdf = n.getComputedData()[0].data;
@@ -339,5 +372,7 @@ export {
   charts,
   plots_data,
   plots_init,
-  tsne
+  tsne,
+  clearCharts,
+  clearTSNE
 };
