@@ -4,6 +4,7 @@ import { Dataset } from '../Dataset.js';
 import { Enum_Computation_Types } from '../ComputedData.js';
 import { Enum_Event_Types } from '../Model.js';
 import { ModelNode } from '../ModelNode.js';
+import { redrawAll } from '../PlotsComp.js';
 
 
 class GridboxList {
