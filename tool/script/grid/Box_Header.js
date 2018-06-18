@@ -2,6 +2,7 @@ import * as typedefs from '../typedefs.js';
 import { GridboxStatus } from './Box_Status.js';
 import { Dataset } from '../Dataset.js';
 import { Model, Enum_Event_Types } from '../Model.js';
+import { plots_data, clearCharts, clearTSNE } from '../PlotsComp.js';
 
 
 class LoadEvent {
@@ -91,6 +92,23 @@ class GridboxHeader {
   };
 
   async load(pathData, pathModel) {
+    if (this.dataset instanceof Dataset) {
+      if (confirm('There is already a Dataset loaded, do you want to proceed? ' +
+        (this.model.needsRecompute ? "\nAlso, you may have unsaved changes in your model." : ''))) {
+        this.dataset.clear();
+        plots_data(this.dataset, this.model);
+
+        this.dataset = null;
+        this.model = null;
+        this.gbStatus.logger('The currently loaded Dataset and Model have been discarded.');
+      } else {
+        return;
+      }
+    }
+
+    clearCharts();
+    clearTSNE();
+
     const ds = await Dataset.fromDataAndQm(pathData, pathModel);
     ds.dataSource = pathData;
     ds.modelSource = pathModel;

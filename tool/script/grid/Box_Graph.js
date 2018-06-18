@@ -234,6 +234,8 @@ class VisSoft2018Graph2 {
     this.$edgeFrom = $('select#edge-from');
     this.$edgeTo = $('select#edge-to');
 
+    this.$wrap.find('svg').remove();
+
     this.$btnRemoveNode = $('button#remove-node').on('click', _ => {
       const nodeId = this.$aggNodes.find('option:selected').val(),
         node = this.nodes.find(n => n.id === nodeId);
@@ -298,8 +300,7 @@ class VisSoft2018Graph2 {
     this.currentTranslate = [0, 0];
     
 
-    this.svg = d3.select("div#svg-wrapper").append("svg:svg")
-      .attr('id', 'foo-svg')
+    this.svg = d3.select(this.$wrap[0]).append("svg:svg")
       .attr("width", this.options.width)
       .attr("height", this.options.height)
       .append('g');
@@ -316,11 +317,11 @@ class VisSoft2018Graph2 {
       this.zoomPanelController();
     });
 
-    d3.select('svg#foo-svg')
+    this.$svg = this.$wrap.find('svg');
+
+    d3.select(this.$svg[0])
       .call(zoom)
       .call(zoom.transform, d3.zoomIdentity.scale(this.currentScale));
-
-    this.$svg = $('svg#foo-svg');
 
     this.nodes = [];
     this.links = [];
