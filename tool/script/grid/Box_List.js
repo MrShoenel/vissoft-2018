@@ -87,7 +87,7 @@ class GridboxList {
     // ugly global for now; sorry! :)
     redrawAll();
 
-    // this._renderList(this.selectedNode);
+    this._renderList(this.selectedNode);
   };
 
   /**
