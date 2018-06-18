@@ -1,9 +1,8 @@
 import * as typedefs from './typedefs.js';
 import { ModelNode } from './ModelNode.js';
+import { dc_canvas } from './DcCanvasBundle.js';
 
-// Cannot import crossfilter normally due to the fact that 'dc-canvas' was built with browserify as
-// a bundle with outdated dependencies. Not sure if there is a better way to do this?
-const crossfilter = require('dc-canvas').crossfilter;
+const crossfilter = dc_canvas.crossfilter;
 
 /**
  * This class will load an entire dataset and the Model.

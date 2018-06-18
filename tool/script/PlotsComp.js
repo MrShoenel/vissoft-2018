@@ -1,4 +1,5 @@
-const dc_canvas = require('dc-canvas');
+import { dc_canvas } from './DcCanvasBundle.js';
+
 const dc = dc_canvas.dc;
 const crossfilter = dc_canvas.crossfilter;
 const d3v3 = dc_canvas.d3;
@@ -117,7 +118,7 @@ function chart(parent, x, y, height=-1, prob=false) {
   // plots[parent].expireCache();
   chart.render();
   chart.redraw();
-}
+};
 
 
 function colorChanged(dist) {
@@ -131,7 +132,7 @@ function colorChanged(dist) {
     chart.colorAccessor(d => distIndex[__data[d.key[2]].entity_id]);
   }
   dc.redrawAll();
-}
+};
 
 
 function changeColormap(cmap) {
@@ -140,7 +141,7 @@ function changeColormap(cmap) {
     chart.colors().range(cmap);
   }
   dc.redrawAll();
-}
+};
 
 function plots_init() {
   sel_colormap = document.getElementById("sel_colormap");
@@ -154,7 +155,7 @@ function plots_init() {
   sel_colormap.value = defaultCmap;
   cmapDomain = [0, 1];
   cmapScale = d3v3.scale.quantize().domain(cmapDomain).range(colormaps[sel_colormap.value]);
-}
+};
 
 function plots_data(evt) {
   // The following instructions should be on a constructor
@@ -166,7 +167,7 @@ function plots_data(evt) {
   for (let row of __data) {
     __index[row.entity_id] = row;
   }
-}
+};
 
 function tsne() {
   // Initialize the columns that will hold the t-SNE results
@@ -178,11 +179,7 @@ function tsne() {
   chart("#tsne", "tsne_x", "tsne_y");
   
   if (typeof(Worker) !== "undefined") {
-    // console.log('Yes! Web worker support!');
-    
-    if (typeof(w) == "undefined") {
-      w = new Worker("script/tsne-worker.js");
-    }
+    let w = new Worker("./script/tsne-worker.js");
 
     // Data pre-processing
     
@@ -228,7 +225,7 @@ function tsne() {
   } else {
     console.log('Sorry! No Web Worker support..');
   }
-}
+};
 
 
 
@@ -330,9 +327,17 @@ function charts(gridBoxGraph) {
       chart("#" + id, xLabel, yLabel, 150, true);
     }
   }
-
-}
+};
 
 function redrawAll() {
   dc.redrawAll();
-}
+};
+
+
+export {
+  redrawAll,
+  charts,
+  plots_data,
+  plots_init,
+  tsne
+};
