@@ -4,6 +4,7 @@ import { Dataset } from '../Dataset.js';
 import { Enum_Computation_Types } from '../ComputedData.js';
 import { Enum_Event_Types } from '../Model.js';
 import { ModelNode } from '../ModelNode.js';
+import { redrawAll } from '../PlotsComp.js';
 
 
 class GridboxList {
@@ -18,8 +19,6 @@ class GridboxList {
     this.dataset = null;
 
     this.dim = null;
-
-    let bound = false;
 
     this.$count = $('span#ranking-num-sel');
     this.$table = $('table#ranking-content').tablesorter();
@@ -46,6 +45,7 @@ class GridboxList {
       }
     };
 
+    let bound = false;
 
     dataObservable.subscribe(evt => {
       this.dataset = evt.dataset;
@@ -77,17 +77,22 @@ class GridboxList {
     return this.model.allNodesArray.find(node => node.name === selected);
   };
 
-  // @SEBASTIAN: Please check here if you need to add the param comments, I'm not sure how to use that :)
+  /**
+   * Will be triggered when a row is clicked and (de-)selected.
+   * 
+   * @param {JQueryEventObject} evt 
+   * @param {string} itemId 
+   */
   _rowOnClick(evt, itemId) {
     if (evt.shiftKey) {
       this.dim.filterAll();
     } else {
       this.dim.filter(itemId);
     }
-    // ugly global for now; sorry! :)
+
     redrawAll();
 
-    // this._renderList(this.selectedNode);
+    this._renderList(this.selectedNode);
   };
 
   /**
@@ -106,7 +111,7 @@ class GridboxList {
 
     // Now, for each element, attach a row
     $tbody.empty();
-    items.forEach((item, idx) => {
+    items.forEach((/** @type{d3.DSVRowString} */ item, /** @type {number} */ idx) => {
       const $tr = $('<tr/>'), itemId = item[this.dataset.entityIdColumn],
         itemCdfVal = cdf.data.find(d => d.id === itemId).val;
 

@@ -4,6 +4,9 @@ import { GridboxStatus } from './grid/Box_Status.js';
 import { GridboxGraph } from './grid/Box_Graph.js';
 import { GridboxList} from './grid/Box_List.js';
 
+import { plots_data, plots_init, charts, tsne } from './PlotsComp.js';
+
+
 
 /**
  * This function does the basic stuff. However, we should write own modules

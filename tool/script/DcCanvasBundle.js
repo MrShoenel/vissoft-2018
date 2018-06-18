@@ -1,3 +1,7 @@
+let require = null;
+
+(() => {
+
 require=(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 module.exports = require("./src/crossfilter").crossfilter;
 
@@ -2347,7 +2351,7 @@ module.exports = crossfilter_zero;
   var d3_arraySlice = [].slice, d3_array = function(list) {
     return d3_arraySlice.call(list);
   };
-  var d3_document = this.document;
+  var d3_document = window.document;
   function d3_documentElement(node) {
     return node && (node.ownerDocument || node.document || node).documentElement;
   }
@@ -3502,7 +3506,7 @@ module.exports = crossfilter_zero;
   d3.mouse = function(container) {
     return d3_mousePoint(container, d3_eventSource());
   };
-  var d3_mouse_bug44083 = this.navigator && /WebKit/.test(this.navigator.userAgent) ? -1 : 0;
+  var d3_mouse_bug44083 = window.navigator && /WebKit/.test(window.navigator.userAgent) ? -1 : 0;
   function d3_mousePoint(container, e) {
     if (e.changedTouches) e = e.changedTouches[0];
     var svg = container.ownerSVGElement || container;
@@ -4461,7 +4465,7 @@ module.exports = crossfilter_zero;
   };
   d3.csv = d3.dsv(",", "text/csv");
   d3.tsv = d3.dsv("	", "text/tab-separated-values");
-  var d3_timer_queueHead, d3_timer_queueTail, d3_timer_interval, d3_timer_timeout, d3_timer_frame = this[d3_vendorSymbol(this, "requestAnimationFrame")] || function(callback) {
+  var d3_timer_queueHead, d3_timer_queueTail, d3_timer_interval, d3_timer_timeout, d3_timer_frame = window[d3_vendorSymbol(window, "requestAnimationFrame")] || function(callback) {
     setTimeout(callback, 17);
   };
   d3.timer = function() {
@@ -24642,3 +24646,11 @@ dc.scatterPlot = function (parent, chartGroup) {
 };
 
 },{"crossfilter2":1,"d3":16,"dc":17}]},{},[]);
+
+})();
+
+const dc = require('dc-canvas');
+
+export {
+  dc as dc_canvas
+};
