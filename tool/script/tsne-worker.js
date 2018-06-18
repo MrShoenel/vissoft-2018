@@ -1,5 +1,5 @@
 importScripts('../bower_components/tsnejs/tsne.js');
-importScripts('./prng.js');
+importScripts('./RandomDeterministic.js');
 
 
 const r = new Random(42);
@@ -43,4 +43,4 @@ self.onmessage = function (e) {
 		finished: true,
 		progress: 1
 	});
-}
+};
