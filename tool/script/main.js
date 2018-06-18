@@ -44,7 +44,7 @@ const run = async() => {
   gbGraph.observable.subscribe(evt => {
     // @SEBASTIAN: I'm currently monitoring this to know when the model has finished computing    
     if (evt.type === 'modelRecomputed') {
-      plots_data(evt);
+      plots_data(evt.data.dataset, evt.data.model);
       charts(gbGraph);
       tsne();
     }
