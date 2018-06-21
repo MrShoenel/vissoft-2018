@@ -93,12 +93,30 @@
   },
   
   
-  
 
+  {
+    "name": "Complexity",
+    "useColumn": false,
+    "sources": ["CYC_Classes", "DAC", "DIT", "MPC", "CBO"]
+  },
+
+  {
+    "name": "Size",
+    "useColumn": false,
+    "sources": ["LOC", "NOM", "LEN", "WMC", "NOC"]
+  },
 
   {
     "name": "Maintainability",
     "useColumn": false,
-    "sources": ["CYC_Classes", "DAC", "DIT", "ILCOM", "LCOM", "LD", "LEN", "LOC", "MPC", "LOD_Class", "NAM", "NOC", "NOM", "RFC", "TCC", "WMC", "CBO"]
+    "sources": ["TCC", "LD", "LCOM", "ILCOM", "LOD_Class"]
+  },
+  
+
+
+  {
+    "name": "Quality",
+    "useColumn": false,
+    "sources": ["Complexity", "Size", "Maintainability"]
   }]
 }
