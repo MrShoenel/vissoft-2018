@@ -26,9 +26,9 @@ class Dataset {
 
     this.entityIdColumn = model.entityId.generateColName;
 
-    for (const row of data) {
-      this.computeEntityId(row);
-    }
+    data.forEach((row, idx) => {
+      this.computeEntityId(row, idx);
+    });
 
     // Notice that no dimensions are created for now; they will be created on demand later.
     this.crossfilter = crossfilter(this.data);
@@ -42,13 +42,17 @@ class Dataset {
   };
 
   /**
-   * 
    * @param {d3.DSVRowString} rowString 
+   * @param {number} rowIdx
    * @returns {string}
    */
-  computeEntityId(rowString) {
-    rowString[this.entityIdColumn] = this.model.entityId.from.map(
-      f => rowString[f]).join('-');
+  computeEntityId(rowString, rowIdx) {
+    rowString[this.entityIdColumn] = this.model.entityId.from.map(colName => {
+      if (colName === '_#_') {
+        return rowIdx;
+      }
+      return rowString[colName];
+    }).join('-');
   };
 
   /**
