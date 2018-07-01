@@ -510,7 +510,7 @@ class VisSoft2018Graph2 {
    * @return {jQuery} the created div containing the elements
    */
   _createNode(node) {
-    const colors = ['olivegreen', 'magenta', 'red', 'green', 'orange', 'goldenrod', 'cyan'];
+    const colors = ['olivegreen', 'magenta', 'red', 'green', 'orange', 'goldenrod', 'cyan', 'turquoise'];
     // depth, numC, numP, isM, isAg, isEmpAgg
     return $('<div/>')
       .addClass('node-wrapper')
