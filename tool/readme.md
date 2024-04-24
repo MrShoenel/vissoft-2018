@@ -1,8 +1,7 @@
 # About
-This repository contains a tool to visulaize joint probabilities of quality 
+This repository contains a tool to visualize joint probabilities of quality 
 models.
 
-_(We should put some more details here what this is exactly.)_
 
 ## Install and Run
 Please follow these steps after having cloned the repository:
